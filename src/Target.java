@@ -8,7 +8,7 @@ public class Target extends GameObject
 	{
 		this.hitbox.setBounds((int) location.x, (int) location.y, 10, 10);
 		this.location = location;
-		this.setColor(1, 0, 0);
+		this.setColor(.4f, 1, .4f);
 	}
 
 	public Vector2f getLocation() {
