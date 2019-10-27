@@ -21,6 +21,7 @@ public class MainGame extends Game implements Scene {
 	private Target marker;
 	private Player player;
 	private List<Bullet> bullets;
+	private List<Enemy> enemies;
 	private boolean gotClick;
 	private Sound song;
 	private int playerBulletTimer;
@@ -36,13 +37,15 @@ public class MainGame extends Game implements Scene {
 		marker = new Target();
 		player = new Player(new Vector2f(WIDTH / 2, HEIGHT / 2));
 		bullets = new ArrayList<>();
+		enemies = new ArrayList<>();
 		gotClick = false;
-		song = new Sound("res/kommSusserTod.wav");
+		song = new Sound("res/cruelAngelThesis.wav");
 		song.play();
 		song.setLoop(true);
 		playerBulletTimer = 0;
-		playerBulletTime = 60;
+		playerBulletTime = 80;
 		GLFW.glfwSetMouseButtonCallback(Game.ui.getWindow(), clickback);
+		enemies.add(new Boss(new Vector2f(WIDTH / 2 - 35, 100), "res/eyeclosed.png"));
 	}
 
 	public Scene drawFrame(int delta) {
@@ -61,12 +64,17 @@ public class MainGame extends Game implements Scene {
 		marker.setLocation(coordinates);
 		player.update(delta);
 		update(bullets, delta);
+		update(enemies, delta);
+
+		/* Do damage! */
+		detectHits(bullets, enemies);
 
 		/* Draw */
 		background.draw(background1);
 		background.draw(background2);
 		marker.draw();
 		player.draw();
+		draw(enemies);
 		draw(bullets);
 
 		/* Deactivate */
@@ -102,6 +110,17 @@ public class MainGame extends Game implements Scene {
 				gotClick = true;
 			}
 		}};
+
+	private void detectHits(List<Bullet> bullets, List<Enemy> enemies) {
+		for (Bullet bullet : bullets) {
+			for (Enemy enemy : enemies) {
+				if (bullet.getHitbox().intersects(enemy.getHitbox())) {
+					bullet.deactivate();
+					enemy.damage(1);
+				}
+			}
+		}
+	}
 
 	private void fireBullet(Player player, Target target) {
 		Vector2f targetLocation = target.getLocation();

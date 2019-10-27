@@ -29,7 +29,7 @@ public class Player extends GameObject {
 		getMovementInput();
 		move(delta);
 		checkBounds();
-		adjustHitbox();
+		adjustHitBox();
 	}
 
 	private void getMovementInput() {
@@ -63,7 +63,7 @@ public class Player extends GameObject {
 		if (pos.y < 0) pos.y = 0;
 	}
 
-	private void adjustHitbox() {
+	private void adjustHitBox() {
 		hitbox.x = (int) pos.x;
 		hitbox.y = (int) pos.y;
 	}
