@@ -1,3 +1,5 @@
+package Entities;
+
 import Tools.Vector2f;
 import edu.utc.game.Game;
 import edu.utc.game.GameObject;
@@ -24,4 +26,6 @@ public abstract class Enemy extends GameObject {
 	public void draw() {
 		texture.draw(this);
 	}
+
+	protected abstract void die();
 }

@@ -1,3 +1,5 @@
+package Entities;
+
 import Tools.Vector2f;
 import edu.utc.game.Game;
 import edu.utc.game.GameObject;

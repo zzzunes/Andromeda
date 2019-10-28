@@ -1,3 +1,5 @@
+package Visuals;
+
 import edu.utc.game.GameObject;
 
 public class Background extends GameObject {

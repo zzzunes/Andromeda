@@ -1,10 +1,17 @@
+package Game;
+
+import Entities.*;
 import Tools.Vector2f;
+import Visuals.Background;
+import Visuals.Effect;
 import edu.utc.game.*;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.glfw.GLFWMouseButtonCallback;
 import org.lwjgl.opengl.GL11;
 
+import java.awt.*;
 import java.util.*;
+import java.util.List;
 
 public class MainGame extends Game implements Scene {
 	public static void main(String[] args) {
@@ -14,7 +21,7 @@ public class MainGame extends Game implements Scene {
 
 	private static final int WIDTH = 900;
 	private static final int HEIGHT = 1000;
-	private static final int SCROLL_SPEED = 3;
+	private static final int SCROLL_SPEED = 10;
 	private Background background1;
 	private Background background2;
 	private Texture background;
@@ -26,6 +33,7 @@ public class MainGame extends Game implements Scene {
 	private Sound song;
 	private int playerBulletTimer;
 	private int playerBulletTime;
+	public static List<Effect> effects;
 
 	public MainGame() {
 		initUI(WIDTH, HEIGHT,"アンドロメダ");
@@ -33,19 +41,20 @@ public class MainGame extends Game implements Scene {
 		GL11.glClearColor(0f, 0f, 0f, 0f);
 		background1 = new Background(0, 0, WIDTH, HEIGHT);
 		background2 = new Background(0, -HEIGHT, WIDTH, HEIGHT);
-		background = new Texture("res/deepspace2.png");
+		background = new Texture("res/Backgrounds/deepspace2.png");
 		marker = new Target();
 		player = new Player(new Vector2f(WIDTH / 2, HEIGHT / 2));
 		bullets = new ArrayList<>();
 		enemies = new ArrayList<>();
+		effects = new ArrayList<>();
 		gotClick = false;
-		song = new Sound("res/cruelAngelThesis.wav");
+		song = new Sound("res/Music/cruelAngelThesis.wav");
 		song.play();
 		song.setLoop(true);
 		playerBulletTimer = 0;
 		playerBulletTime = 80;
 		GLFW.glfwSetMouseButtonCallback(Game.ui.getWindow(), clickback);
-		enemies.add(new Boss(new Vector2f(WIDTH / 2 - 35, 100), "res/eyeclosed.png"));
+		enemies.add(new Boss(new Vector2f(WIDTH / 2 - 35, 100), "res/Enemy/eyeclosed.png"));
 	}
 
 	public Scene drawFrame(int delta) {
@@ -65,9 +74,15 @@ public class MainGame extends Game implements Scene {
 		player.update(delta);
 		update(bullets, delta);
 		update(enemies, delta);
+		updateEffects(effects, delta);
 
 		/* Do damage! */
 		detectHits(bullets, enemies);
+
+		/* Deactivate */
+		deactivate(bullets);
+		deactivate(enemies);
+		stopEffects(effects);
 
 		/* Draw */
 		background.draw(background1);
@@ -76,9 +91,7 @@ public class MainGame extends Game implements Scene {
 		player.draw();
 		draw(enemies);
 		draw(bullets);
-
-		/* Deactivate */
-		deactivate(bullets);
+		drawEffects(effects);
 
 		adjustBackgrounds(background1, background2);
 		return this;
@@ -100,6 +113,22 @@ public class MainGame extends Game implements Scene {
 		objects.removeIf(o -> !o.isActive());
 	}
 
+	private void updateEffects(List<Effect> effects, int delta) {
+		for (Effect effect : effects) {
+			effect.update(delta);
+		}
+	}
+
+	private void drawEffects(List<Effect> effects) {
+		for (Effect effect : effects) {
+			effect.draw();
+		}
+	}
+
+	private void stopEffects(List<Effect> effects) {
+		effects.removeIf(effect -> !effect.isActive());
+	}
+
 	private GLFWMouseButtonCallback clickback = new GLFWMouseButtonCallback() {
 		public void invoke(long window, int button, int action, int mods)
 		{
@@ -117,6 +146,13 @@ public class MainGame extends Game implements Scene {
 				if (bullet.getHitbox().intersects(enemy.getHitbox())) {
 					bullet.deactivate();
 					enemy.damage(1);
+					effects.add(new Effect(
+							"res/pow.png",
+							1000,
+							new Rectangle(bullet.getHitbox().x
+							- (bullet.getHitbox().width / 2),
+							bullet.getHitbox().y - (bullet.getHitbox().height / 2),
+							30, 30)));
 				}
 			}
 		}
