@@ -25,7 +25,7 @@ public class Boss extends Enemy {
 		}
 		else if (health < 50) texture = new Texture("res/Enemy/eyeopen.png");
 		else if (health < 200) texture = new Texture("res/Enemy/eyehalf.png");
-		if (Math.abs(pos.x - destination.x) > .05f || Math.abs(pos.y - destination.y) > .05f) {
+		if (Math.abs(pos.x - destination.x) > .04f || Math.abs(pos.y - destination.y) > .04f) {
 			goToDestination(delta);
 		}
 		adjustHitBox();
