@@ -1,5 +1,6 @@
 package edu.utc.game;
 
+import Tools.Vector2f;
 import org.lwjgl.glfw.GLFW;
 import static org.lwjgl.glfw.GLFW.glfwCreateWindow;
 import static org.lwjgl.glfw.GLFW.glfwDefaultWindowHints;
@@ -113,12 +114,12 @@ public class UI {
 		}
 	}
 	
-	public XYPair<Integer> getMouseLocation()
+	public Vector2f getMouseLocation()
 	{
 		double[] x = new double[1];
 		double[] y = new double[1];
 		GLFW.glfwGetCursorPos(window,  x,  y);
-		return new XYPair<Integer>((int)x[0],(int)y[0]);
+		return new Vector2f((float) x[0],(float) y[0]);
 	}
 	
 	public boolean mouseButtonIsPressed(int button)

@@ -1,5 +1,6 @@
 package Visuals;
 
+import edu.utc.game.Sound;
 import edu.utc.game.Texture;
 
 import java.awt.*;
@@ -14,6 +15,8 @@ public class Effect {
 	private boolean animated;
 	private int currentAnimation;
 	private ArrayList<String> paths = new ArrayList<>();
+	private Sound sound;
+	private boolean soundPlayed;
 
 	public Effect(String path, int duration, Rectangle location) {
 		this.texture = new Texture(path);
@@ -33,6 +36,19 @@ public class Effect {
 		this.active = true;
 		this.animated = true;
 		this.currentAnimation = 0;
+	}
+
+	public Effect(ArrayList<String> paths, int duration, Rectangle location, String soundPath) {
+		this.texture = new Texture(paths.get(0));
+		this.paths = paths;
+		this.duration = duration;
+		this.location = location;
+		this.timeActive = 0;
+		this.active = true;
+		this.animated = true;
+		this.currentAnimation = 0;
+		this.sound = new Sound(soundPath);
+		this.soundPlayed = false;
 	}
 
 	public boolean isActive() {
@@ -58,6 +74,10 @@ public class Effect {
 	}
 
 	public void draw() {
+		if (sound != null && !soundPlayed) {
+			sound.play();
+			soundPlayed = true;
+		}
 		texture.draw(location);
 	}
 }

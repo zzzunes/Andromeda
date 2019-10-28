@@ -1,9 +1,8 @@
 package edu.utc.game;
-import static org.lwjgl.glfw.GLFW.glfwGetTime;
-import static org.lwjgl.glfw.GLFW.glfwWindowShouldClose;
-import static org.lwjgl.glfw.GLFW.glfwPollEvents;
-import static org.lwjgl.glfw.GLFW.glfwSwapBuffers;
+import org.lwjgl.glfw.GLFW;
+import org.lwjgl.opengl.GL11;
 
+import static org.lwjgl.glfw.GLFW.*;
 
 
 public abstract class Game {
@@ -34,6 +33,9 @@ public abstract class Game {
 			float time2=(float)glfwGetTime();
 			currScene = currScene.drawFrame((int)(1000*(time2-time)));
 			glfwSwapBuffers(ui.getWindow());
+			if (ui.keyPressed(GLFW.GLFW_KEY_ESCAPE)) {
+				glfwSetWindowShouldClose(ui.getWindow(), true);
+			}
 			time=time2;
 
 		}

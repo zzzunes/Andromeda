@@ -25,7 +25,7 @@ public class MainGame extends Game implements Scene {
 	private Background background1;
 	private Background background2;
 	private Texture background;
-	private Target marker;
+	private Reticle marker;
 	private Player player;
 	private List<Bullet> bullets;
 	private List<Enemy> enemies;
@@ -37,12 +37,12 @@ public class MainGame extends Game implements Scene {
 
 	public MainGame() {
 		initUI(WIDTH, HEIGHT,"アンドロメダ");
-		Game.ui.enableMouseCursor(true);
+		Game.ui.enableMouseCursor(false);
 		GL11.glClearColor(0f, 0f, 0f, 0f);
 		background1 = new Background(0, 0, WIDTH, HEIGHT);
 		background2 = new Background(0, -HEIGHT, WIDTH, HEIGHT);
 		background = new Texture("res/Backgrounds/deepspace2.png");
-		marker = new Target();
+		marker = new Reticle();
 		player = new Player(new Vector2f(WIDTH / 2, HEIGHT / 2));
 		bullets = new ArrayList<>();
 		enemies = new ArrayList<>();
@@ -59,7 +59,7 @@ public class MainGame extends Game implements Scene {
 
 	public Scene drawFrame(int delta) {
 		GL11.glClear(GL11.GL_COLOR_BUFFER_BIT | GL11.GL_DEPTH_BUFFER_BIT);
-		Vector2f coordinates = new Vector2f(Game.ui.getMouseLocation().x, Game.ui.getMouseLocation().y);
+		Vector2f coordinates = new Vector2f(Game.ui.getMouseLocation());
 
 		/* Timers */
 		playerBulletTimer += delta;
@@ -158,11 +158,11 @@ public class MainGame extends Game implements Scene {
 		}
 	}
 
-	private void fireBullet(Player player, Target target) {
-		Vector2f targetLocation = target.getLocation();
+	private void fireBullet(Player player, Reticle reticle) {
+		Vector2f targetLocation = reticle.getLocation();
 		Vector2f playerLocation = player.getLocation();
-		targetLocation.x -= target.getHitbox().width / 2;
-		targetLocation.y -= target.getHitbox().height / 2;
+		targetLocation.x -= reticle.getHitbox().width / 2;
+		targetLocation.y -= reticle.getHitbox().height / 2;
 		Vector2f direction = (targetLocation.subtract(playerLocation));
 		direction.normalize();
 		Vector2f location = new Vector2f(playerLocation);

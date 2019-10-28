@@ -3,18 +3,20 @@ package Entities;
 import Tools.Vector2f;
 import edu.utc.game.Game;
 import edu.utc.game.GameObject;
+import edu.utc.game.Texture;
 
 public class Bullet extends GameObject {
 	private Vector2f pos;
 	private Vector2f dir;
 	private float speed;
+	private Texture texture;
 
 	public Bullet(Vector2f position, Vector2f direction) {
 		this.pos = position;
 		this.dir = direction;
 		this.hitbox.setBounds((int) pos.x, (int) pos.y, 10, 10);
 		this.speed = 1f;
-		super.setColor(1, 1, 1);
+		this.texture = new Texture("res/Bullets/roundBullet.png");
 	}
 
 	@Override
@@ -25,5 +27,10 @@ public class Bullet extends GameObject {
 		hitbox.y = (int) pos.y;
 
 		if (pos.x < 0 || pos.x > Game.ui.getWidth() || pos.y < 0 || pos.y > Game.ui.getHeight()) deactivate();
+	}
+
+	@Override
+	public void draw() {
+		texture.draw(this);
 	}
 }

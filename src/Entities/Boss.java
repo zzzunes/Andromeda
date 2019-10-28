@@ -6,7 +6,6 @@ import Visuals.Effect;
 import edu.utc.game.Game;
 import edu.utc.game.Texture;
 
-import java.awt.*;
 import java.util.ArrayList;
 
 public class Boss extends Enemy {
@@ -14,7 +13,7 @@ public class Boss extends Enemy {
 		super(destination, texture);
 		this.pos = new Vector2f(Game.ui.getWidth() / 2f - 35, -100);
 		this.hitbox.setBounds((int) pos.x, (int) pos.y, 70, 70);
-		this.health = 50;
+		this.health = 300;
 		this.speed = .02f;
 	}
 
@@ -24,8 +23,8 @@ public class Boss extends Enemy {
 			die();
 			return;
 		}
-		else if (health < 100) texture = new Texture("res/Enemy/eyeopen.png");
-		else if (health < 400) texture = new Texture("res/Enemy/eyehalf.png");
+		else if (health < 50) texture = new Texture("res/Enemy/eyeopen.png");
+		else if (health < 200) texture = new Texture("res/Enemy/eyehalf.png");
 		if (Math.abs(pos.x - destination.x) > .05f || Math.abs(pos.y - destination.y) > .05f) {
 			goToDestination(delta);
 		}
@@ -58,7 +57,7 @@ public class Boss extends Enemy {
 		explosionPics.add("res/Explosion/eight.png");
 		explosionPics.add("res/Explosion/nine.png");
 		explosionPics.add("res/Explosion/ten.png");
-		Effect explode = new Effect(explosionPics, 100, this.hitbox);
+		Effect explode = new Effect(explosionPics, 100, this.hitbox, "res/Sounds/boom.wav");
 		MainGame.effects.add(explode);
 	}
 }
