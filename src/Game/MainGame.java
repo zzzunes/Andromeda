@@ -54,6 +54,7 @@ public class MainGame extends Game implements Scene {
 		GLFW.glfwSetMouseButtonCallback(Game.ui.getWindow(), clickback);
 		enemies.add(EnemyGenerator.generateEyeSpiral(new Vector2f(-100 - 70, 100), new Vector2f(200, 100)));
 		enemies.add(EnemyGenerator.generateEyeCircle(new Vector2f(WIDTH + 100, 100), new Vector2f(WIDTH - 200 - 70, 100)));
+		enemies.add(EnemyGenerator.generateEyeOcto(new Vector2f(WIDTH / 2f - 35, 0), new Vector2f(WIDTH / 2f - 35, 100)));
 	}
 
 	public Scene drawFrame(int delta) {

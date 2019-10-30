@@ -17,7 +17,8 @@ public abstract class Enemy extends GameObject {
 
 	public static enum Pattern {
 		SPIRAL,
-		CIRCLE
+		CIRCLE,
+		OCTO
 	}
 
 	public Enemy(Vector2f destination, String texture) {

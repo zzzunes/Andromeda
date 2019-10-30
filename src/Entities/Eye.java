@@ -6,6 +6,8 @@ import VFX.Effect;
 import VFX.EffectGenerator;
 import edu.utc.game.Texture;
 
+import java.util.ArrayList;
+
 public class Eye extends Enemy {
 	private boolean destinationReached;
 	private boolean goingLeft;
@@ -16,7 +18,7 @@ public class Eye extends Enemy {
 	private int bulletsPerFrame;
 	private Pattern pattern;
 
-	public Eye(Vector2f position, Vector2f destination, String texture, Pattern pattern) {
+	public Eye(Vector2f position, Vector2f destination, String texture, Pattern pattern, int delay) {
 		super(destination, texture);
 		this.pos = position;
 		this.hitbox.setBounds((int) pos.x, (int) pos.y, 70, 70);
@@ -24,8 +26,8 @@ public class Eye extends Enemy {
 		this.speed = .03f;
 		this.destinationReached = false;
 		this.bulletTimer = 0;
-		this.bulletRate = 1500;
-		this.bulletSpeed = .03f;
+		this.bulletRate = delay;
+		this.bulletSpeed = .1f;
 		this.circlePosition = 0;
 		this.bulletsPerFrame = 4;
 		this.pattern = pattern;
@@ -48,13 +50,17 @@ public class Eye extends Enemy {
 				fireCircle();
 				bulletTimer = 0;
 			}
+			if (pattern == Pattern.OCTO && bulletTimer > bulletRate) {
+				fireOcto();
+				bulletTimer = 0;
+			}
 		}
 
 		adjustHitBox();
 	}
 
 	private void fireSpiral() {
-		Vector2f center = new Vector2f(pos.x + hitbox.width / 3f, pos.y + hitbox.height / 3f);
+		Vector2f center = new Vector2f(pos.x + hitbox.width / 2f, pos.y + hitbox.height / 2f);
 		for (int i = 0; i < bulletsPerFrame; i++) {
 			circlePosition++;
 			if (circlePosition > 360) circlePosition = 0;
@@ -69,11 +75,31 @@ public class Eye extends Enemy {
 	}
 
 	private void fireCircle() {
-		Vector2f center = new Vector2f(pos.x + hitbox.width / 3f, pos.y + hitbox.height / 3f);
+		Vector2f center = new Vector2f(pos.x + hitbox.width / 2f, pos.y + hitbox.height / 2f);
 		for (int i = 0; i < 360; i++) {
 			float x = hitbox.width * (float) Math.cos(i * Math.PI / 180);
 			float y = hitbox.width * (float) Math.sin(i * Math.PI / 180);
 			Vector2f position = new Vector2f(x + center.x, y + center.y);
+			Vector2f direction = (position.subtract(center));
+			direction.normalize();
+			Bullet bullet = new Bullet(position, direction, bulletSpeed);
+			MainGame.enemyBullets.add(bullet);
+		}
+	}
+
+	private void fireOcto() {
+		Vector2f center = new Vector2f(pos.x - 5 + hitbox.width / 2f, pos.y - 5 + hitbox.height / 2f);
+		ArrayList<Vector2f> positions = new ArrayList<>();
+		float outside = hitbox.width / 2f;
+		positions.add(new Vector2f(center.x - outside, center.y));
+		positions.add(new Vector2f(center.x + outside, center.y));
+		positions.add(new Vector2f(center.x - outside, center.y - outside));
+		positions.add(new Vector2f(center.x + outside, center.y + outside));
+		positions.add(new Vector2f(center.x - outside, center.y + outside));
+		positions.add(new Vector2f(center.x + outside, center.y - outside));
+		positions.add(new Vector2f(center.x, center.y + outside));
+		positions.add(new Vector2f(center.x, center.y - outside));
+		for (Vector2f position : positions) {
 			Vector2f direction = (position.subtract(center));
 			direction.normalize();
 			Bullet bullet = new Bullet(position, direction, bulletSpeed);
