@@ -11,12 +11,20 @@ public class Bullet extends GameObject {
 	private float speed;
 	private Texture texture;
 
-	public Bullet(Vector2f position, Vector2f direction) {
+	public Bullet(Vector2f position, Vector2f direction, float speed) {
+		this.pos = position;
+		this.dir = direction;
+		this.hitbox.setBounds((int) pos.x, (int) pos.y, 10, 10);
+		this.speed = speed;
+		this.texture = new Texture("res/Bullets/roundBullet.png");
+	}
+
+	public Bullet(Vector2f position, Vector2f direction, String texturePath) {
 		this.pos = position;
 		this.dir = direction;
 		this.hitbox.setBounds((int) pos.x, (int) pos.y, 10, 10);
 		this.speed = 1f;
-		this.texture = new Texture("res/Bullets/roundBullet.png");
+		this.texture = new Texture(texturePath);
 	}
 
 	@Override

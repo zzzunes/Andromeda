@@ -11,9 +11,16 @@ public abstract class Enemy extends GameObject {
 	protected Texture texture;
 	protected float health;
 	protected float speed;
+	protected int bulletTimer;
+	protected int bulletRate;
+	protected float bulletSpeed;
+
+	public static enum Pattern {
+		SPIRAL,
+		CIRCLE
+	}
 
 	public Enemy(Vector2f destination, String texture) {
-		this.pos = new Vector2f(Game.ui.getWidth() / 2f, -100);
 		this.destination = destination;
 		this.texture = new Texture(texture);
 	}

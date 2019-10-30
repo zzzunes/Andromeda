@@ -29,11 +29,11 @@ public class MainGame extends Game implements Scene {
 	private Reticle marker;
 	private Player player;
 	private List<Bullet> bullets;
-	private List<Bullet> enemyBullets;
 	private List<Enemy> enemies;
 	private boolean gotClick;
 	private BackgroundMusic music;
 	public static List<Effect> effects;
+	public static List<Bullet> enemyBullets;
 
 	public MainGame() {
 		initUI(WIDTH, HEIGHT,"アンドロメダ");
@@ -52,15 +52,15 @@ public class MainGame extends Game implements Scene {
 		music = new BackgroundMusic("cruelAngelThesis");
 		music.start();
 		GLFW.glfwSetMouseButtonCallback(Game.ui.getWindow(), clickback);
-		enemies.add(new Boss(new Vector2f(WIDTH / 2 - 35, 100), "res/Enemy/eyeclosed.png"));
+		enemies.add(EnemyGenerator.generateEyeSpiral(new Vector2f(-100 - 70, 100), new Vector2f(200, 100)));
+		enemies.add(EnemyGenerator.generateEyeCircle(new Vector2f(WIDTH + 100, 100), new Vector2f(WIDTH - 200 - 70, 100)));
 	}
 
 	public Scene drawFrame(int delta) {
 		GL11.glClear(GL11.GL_COLOR_BUFFER_BIT | GL11.GL_DEPTH_BUFFER_BIT);
 		Vector2f coordinates = new Vector2f(Game.ui.getMouseLocation());
 
-		updateTimers(delta);
-		firePlayerBullets(gotClick);
+		if (player.isActive()) firePlayerBullets(gotClick);
 		marker.setLocation(coordinates);
 		updateGame(delta);
 		collideAndHit();
@@ -69,10 +69,6 @@ public class MainGame extends Game implements Scene {
 
 		adjustBackgrounds(background1, background2);
 		return this;
-	}
-
-	private void updateTimers(int delta) {
-		player.bulletTimer += delta;
 	}
 
 	private void firePlayerBullets(boolean gotClick) {
@@ -87,17 +83,19 @@ public class MainGame extends Game implements Scene {
 			player.update(delta);
 		}
 		update(bullets, delta);
+		update(enemyBullets, delta);
 		update(enemies, delta);
 		updateEffects(effects, delta);
 	}
 
 	private void collideAndHit() {
 		detectHits(bullets, enemies);
-		detectHitsPlayer(enemyBullets, player);
+		if (player.isActive()) detectHitsPlayer(enemyBullets, player);
 	}
 
 	private void deactivate() {
 		deactivate(bullets);
+		deactivate(enemyBullets);
 		deactivate(enemies);
 		cancelBullets(bullets, enemyBullets);
 		stopEffects(effects);
@@ -107,9 +105,10 @@ public class MainGame extends Game implements Scene {
 		background.draw(background1);
 		background.draw(background2);
 		marker.draw();
-		player.draw();
+		if (player.isActive()) player.draw();
 		draw(enemies);
 		draw(bullets);
+		draw(enemyBullets);
 		drawEffects(effects);
 	}
 
@@ -201,7 +200,8 @@ public class MainGame extends Game implements Scene {
 		location.y += player.getHitbox().height / 3f;
 		location.x += direction.x * (player.getHitbox().width / 1.5f);
 		location.y += direction.y * (player.getHitbox().height / 1.5f);
-		Bullet bullet = new Bullet(location, direction);
+		float speed = 1f;
+		Bullet bullet = new Bullet(location, direction, speed);
 		bullets.add(bullet);
 	}
 

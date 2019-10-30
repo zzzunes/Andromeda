@@ -1,15 +1,13 @@
 package Entities;
 
 import Tools.Vector2f;
-import VFX.Animation;
 import VFX.Effect;
 import Game.MainGame;
+import VFX.EffectGenerator;
 import edu.utc.game.Game;
 import edu.utc.game.GameObject;
 import edu.utc.game.Texture;
 import org.lwjgl.glfw.GLFW;
-
-import java.util.ArrayList;
 
 public class Player extends GameObject {
 	private Vector2f pos;
@@ -27,9 +25,9 @@ public class Player extends GameObject {
 		this.speed = .3f;
 		this.direction = new Vector2f(0, 0);
 		this.texture = new Texture("res/spaceship.png");
-		this.hp = 5;
+		this.hp = 50;
 		this.bulletTimer = 0;
-		this.bulletRate = 100;
+		this.bulletRate = 40;
 	}
 
 	public Vector2f getLocation() {
@@ -94,18 +92,7 @@ public class Player extends GameObject {
 
 	private void die() {
 		deactivate();
-		ArrayList<String> explosionPics = new ArrayList<String>();
-		explosionPics.add("res/Explosion/one.png");
-		explosionPics.add("res/Explosion/two.png");
-		explosionPics.add("res/Explosion/three.png");
-		explosionPics.add("res/Explosion/four.png");
-		explosionPics.add("res/Explosion/five.png");
-		explosionPics.add("res/Explosion/six.png");
-		explosionPics.add("res/Explosion/seven.png");
-		explosionPics.add("res/Explosion/eight.png");
-		explosionPics.add("res/Explosion/nine.png");
-		explosionPics.add("res/Explosion/ten.png");
-		Effect explode = new Animation(explosionPics, 100, this.hitbox, "res/Sounds/boom.wav");
+		Effect explode = EffectGenerator.generateDeathExplosion(this);
 		MainGame.effects.add(explode);
 	}
 }
