@@ -2,32 +2,35 @@ package Entities;
 
 import Game.MainGame;
 import Tools.Vector2f;
-import Visuals.Effect;
+import VFX.Animation;
+import VFX.Effect;
 import edu.utc.game.Game;
 import edu.utc.game.Texture;
 
 import java.util.ArrayList;
 
 public class Boss extends Enemy {
+	private boolean destinationReached;
+
 	public Boss(Vector2f destination, String texture) {
 		super(destination, texture);
 		this.pos = new Vector2f(Game.ui.getWidth() / 2f - 35, -100);
 		this.hitbox.setBounds((int) pos.x, (int) pos.y, 70, 70);
 		this.health = 300;
 		this.speed = .02f;
+		this.destinationReached = false;
 	}
 
 	@Override
 	public void update(int delta) {
-		if (health <= 0) {
-			die();
-			return;
-		}
+		if (health <= 0) die();
 		else if (health < 50) texture = new Texture("res/Enemy/eyeopen.png");
 		else if (health < 200) texture = new Texture("res/Enemy/eyehalf.png");
-		if (Math.abs(pos.x - destination.x) > .04f || Math.abs(pos.y - destination.y) > .04f) {
+		destinationReached = pos.distanceTo(destination) <= .04f;
+		if (!destinationReached) {
 			goToDestination(delta);
 		}
+
 		adjustHitBox();
 	}
 
@@ -57,7 +60,7 @@ public class Boss extends Enemy {
 		explosionPics.add("res/Explosion/eight.png");
 		explosionPics.add("res/Explosion/nine.png");
 		explosionPics.add("res/Explosion/ten.png");
-		Effect explode = new Effect(explosionPics, 100, this.hitbox, "res/Sounds/boom.wav");
+		Effect explode = new Animation(explosionPics, 100, this.hitbox, "res/Sounds/boom.wav");
 		MainGame.effects.add(explode);
 	}
 }

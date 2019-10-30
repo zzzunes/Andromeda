@@ -47,6 +47,11 @@ public class Vector2f {
 		return randomDirection;
 	}
 
+	public float distanceTo(Vector2f other) {
+		Vector2f distance = other.subtract(this);
+		return distance.magnitude();
+	}
+
 	/* Returns the sum vector of these two vectors */
 	public Vector2f add(Vector2f other) {
 		return new Vector2f(this.x + other.x, this.y + other.y);

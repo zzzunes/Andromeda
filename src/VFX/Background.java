@@ -1,4 +1,4 @@
-package Visuals;
+package VFX;
 
 import edu.utc.game.GameObject;
 

@@ -2,14 +2,15 @@ package Game;
 
 import Entities.*;
 import Tools.Vector2f;
-import Visuals.Background;
-import Visuals.Effect;
+import VFX.Background;
+import VFX.BackgroundMusic;
+import VFX.Effect;
+import VFX.EffectGenerator;
 import edu.utc.game.*;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.glfw.GLFWMouseButtonCallback;
 import org.lwjgl.opengl.GL11;
 
-import java.awt.*;
 import java.util.*;
 import java.util.List;
 
@@ -28,11 +29,10 @@ public class MainGame extends Game implements Scene {
 	private Reticle marker;
 	private Player player;
 	private List<Bullet> bullets;
+	private List<Bullet> enemyBullets;
 	private List<Enemy> enemies;
 	private boolean gotClick;
-	private Sound song;
-	private int playerBulletTimer;
-	private int playerBulletTime;
+	private BackgroundMusic music;
 	public static List<Effect> effects;
 
 	public MainGame() {
@@ -45,14 +45,12 @@ public class MainGame extends Game implements Scene {
 		marker = new Reticle();
 		player = new Player(new Vector2f(WIDTH / 2, HEIGHT / 2));
 		bullets = new ArrayList<>();
+		enemyBullets = new ArrayList<>();
 		enemies = new ArrayList<>();
 		effects = new ArrayList<>();
 		gotClick = false;
-		song = new Sound("res/Music/cruelAngelThesis.wav");
-		song.play();
-		song.setLoop(true);
-		playerBulletTimer = 0;
-		playerBulletTime = 80;
+		music = new BackgroundMusic("cruelAngelThesis");
+		music.start();
 		GLFW.glfwSetMouseButtonCallback(Game.ui.getWindow(), clickback);
 		enemies.add(new Boss(new Vector2f(WIDTH / 2 - 35, 100), "res/Enemy/eyeclosed.png"));
 	}
@@ -61,30 +59,51 @@ public class MainGame extends Game implements Scene {
 		GL11.glClear(GL11.GL_COLOR_BUFFER_BIT | GL11.GL_DEPTH_BUFFER_BIT);
 		Vector2f coordinates = new Vector2f(Game.ui.getMouseLocation());
 
-		/* Timers */
-		playerBulletTimer += delta;
-
-		if (gotClick && playerBulletTimer >= playerBulletTime) {
-			fireBullet(player, marker);
-			playerBulletTimer = 0;
-		}
-
-		/* Update */
+		updateTimers(delta);
+		firePlayerBullets(gotClick);
 		marker.setLocation(coordinates);
-		player.update(delta);
+		updateGame(delta);
+		collideAndHit();
+		deactivate();
+		draw();
+
+		adjustBackgrounds(background1, background2);
+		return this;
+	}
+
+	private void updateTimers(int delta) {
+		player.bulletTimer += delta;
+	}
+
+	private void firePlayerBullets(boolean gotClick) {
+		if (gotClick && player.bulletTimer >= player.bulletRate) {
+			fireBullet(player, marker);
+			player.bulletTimer = 0;
+		}
+	}
+
+	private void updateGame(int delta) {
+		if (player.isActive()) {
+			player.update(delta);
+		}
 		update(bullets, delta);
 		update(enemies, delta);
 		updateEffects(effects, delta);
+	}
 
-		/* Do damage! */
+	private void collideAndHit() {
 		detectHits(bullets, enemies);
+		detectHitsPlayer(enemyBullets, player);
+	}
 
-		/* Deactivate */
+	private void deactivate() {
 		deactivate(bullets);
 		deactivate(enemies);
+		cancelBullets(bullets, enemyBullets);
 		stopEffects(effects);
+	}
 
-		/* Draw */
+	private void draw() {
 		background.draw(background1);
 		background.draw(background2);
 		marker.draw();
@@ -92,9 +111,6 @@ public class MainGame extends Game implements Scene {
 		draw(enemies);
 		draw(bullets);
 		drawEffects(effects);
-
-		adjustBackgrounds(background1, background2);
-		return this;
 	}
 
 	private <T extends GameObject> void update(List<T> gameObjects, int delta) {
@@ -113,14 +129,14 @@ public class MainGame extends Game implements Scene {
 		objects.removeIf(o -> !o.isActive());
 	}
 
-	private void updateEffects(List<Effect> effects, int delta) {
-		for (Effect effect : effects) {
+	private void updateEffects(List<Effect> staticEffects, int delta) {
+		for (Effect effect : staticEffects) {
 			effect.update(delta);
 		}
 	}
 
-	private void drawEffects(List<Effect> effects) {
-		for (Effect effect : effects) {
+	private void drawEffects(List<Effect> staticEffects) {
+		for (Effect effect : staticEffects) {
 			effect.draw();
 		}
 	}
@@ -146,13 +162,28 @@ public class MainGame extends Game implements Scene {
 				if (bullet.getHitbox().intersects(enemy.getHitbox())) {
 					bullet.deactivate();
 					enemy.damage(1);
-					effects.add(new Effect(
-							"res/pow.png",
-							1000,
-							new Rectangle(bullet.getHitbox().x
-							- (bullet.getHitbox().width / 2),
-							bullet.getHitbox().y - (bullet.getHitbox().height / 2),
-							30, 30)));
+					effects.add(EffectGenerator.generateHitExplosion(bullet));
+				}
+			}
+		}
+	}
+
+	private void detectHitsPlayer(List<Bullet> bullets, Player player) {
+		for (Bullet bullet : bullets) {
+			if (bullet.getHitbox().intersects(player.getHitbox())) {
+				bullet.deactivate();
+				player.takeHit();
+				effects.add(EffectGenerator.generateHitExplosion(bullet));
+			}
+		}
+	}
+
+	public void cancelBullets(List<Bullet> playerBullets, List<Bullet> enemyBullets) {
+		for (Bullet pBullets : playerBullets) {
+			for (Bullet eBullet: enemyBullets) {
+				if (pBullets.getHitbox().intersects(eBullet.getHitbox())) {
+					pBullets.deactivate();
+					eBullet.deactivate();
 				}
 			}
 		}
