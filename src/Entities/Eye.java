@@ -10,10 +10,6 @@ import java.util.ArrayList;
 
 public class Eye extends Enemy {
 	private boolean destinationReached;
-	private boolean goingLeft;
-	private boolean goingRight;
-	private boolean goingDown;
-	private boolean goingUp;
 	private int circlePosition;
 	private int bulletsPerFrame;
 	private Pattern pattern;
@@ -27,9 +23,9 @@ public class Eye extends Enemy {
 		this.destinationReached = false;
 		this.bulletTimer = 0;
 		this.bulletRate = delay;
-		this.bulletSpeed = .1f;
+		this.bulletSpeed = .05f;
 		this.circlePosition = 0;
-		this.bulletsPerFrame = 4;
+		this.bulletsPerFrame = 2;
 		this.pattern = pattern;
 	}
 

@@ -32,7 +32,19 @@ public abstract class Enemy extends GameObject {
 
 	@Override
 	public void draw() {
-		texture.draw(this);
+		if (!outOfBounds())  {
+			texture.draw(this);
+		}
+	}
+
+	protected boolean outOfBounds() {
+		int x = hitbox.x;
+		int y = hitbox.y;
+		int w = hitbox.width;
+		int h = hitbox.height;
+		int winW = Game.ui.getWidth();
+		int winH = Game.ui.getHeight();
+		return (x + w <= 0 || y + h <= 0 || x >= winW || y >= winH);
 	}
 
 	protected abstract void die();

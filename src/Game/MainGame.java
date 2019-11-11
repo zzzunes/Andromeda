@@ -20,8 +20,8 @@ public class MainGame extends Game implements Scene {
 		game.gameLoop();
 	}
 
-	private static final int WIDTH = 900;
-	private static final int HEIGHT = 1000;
+	private static final int WIDTH = 600;
+	private static final int HEIGHT = 800;
 	private static final int SCROLL_SPEED = 10;
 	private Background background1;
 	private Background background2;

@@ -1,6 +1,7 @@
 package Entities;
 
 import Tools.Vector2f;
+import edu.utc.game.Game;
 import edu.utc.game.GameObject;
 import edu.utc.game.Texture;
 
@@ -28,5 +29,16 @@ public class Reticle extends GameObject
 	@Override
 	public void draw() {
 		texture.draw(this);
+	}
+
+	private void checkBounds() {
+		if (location.x + hitbox.width > Game.ui.getWidth()) {
+			location.x = Game.ui.getWidth() - hitbox.width;
+		}
+		if (location.y + hitbox.height > Game.ui.getHeight()) {
+			location.y = Game.ui.getHeight() - hitbox.height;
+		}
+		if (location.x < 0) location.x = 0;
+		if (location.y < 0) location.y = 0;
 	}
 }
