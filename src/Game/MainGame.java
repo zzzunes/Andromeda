@@ -26,7 +26,7 @@ public class MainGame extends Game implements Scene {
 	private Background background1;
 	private Background background2;
 	private Texture background;
-	private Reticle marker;
+	private Reticle reticle;
 	private Player player;
 	private List<Bullet> bullets;
 	private List<Enemy> enemies;
@@ -42,8 +42,8 @@ public class MainGame extends Game implements Scene {
 		background1 = new Background(0, 0, WIDTH, HEIGHT);
 		background2 = new Background(0, -HEIGHT, WIDTH, HEIGHT);
 		background = new Texture("res/Backgrounds/deepspace2.png");
-		marker = new Reticle();
-		player = new Player(new Vector2f(WIDTH / 2, HEIGHT / 2));
+		reticle = new Reticle();
+		player = new Player(new Vector2f(WIDTH / 2f, HEIGHT / 2f));
 		bullets = new ArrayList<>();
 		enemyBullets = new ArrayList<>();
 		enemies = new ArrayList<>();
@@ -53,30 +53,33 @@ public class MainGame extends Game implements Scene {
 		music.start();
 		GLFW.glfwSetMouseButtonCallback(Game.ui.getWindow(), clickback);
 		enemies.add(EnemyGenerator.generateEyeSpiral(new Vector2f(-100 - 70, 100), new Vector2f(200, 100)));
-		enemies.add(EnemyGenerator.generateEyeCircle(new Vector2f(WIDTH + 100, 100), new Vector2f(WIDTH - 200 - 70, 100)));
-		enemies.add(EnemyGenerator.generateEyeOcto(new Vector2f(WIDTH / 2f - 35, 0), new Vector2f(WIDTH / 2f - 35, 100)));
+		//enemies.add(EnemyGenerator.generateEyeCircle(new Vector2f(WIDTH + 100, 100), new Vector2f(WIDTH - 200 - 70, 100)));
+		//enemies.add(EnemyGenerator.generateEyeOcto(new Vector2f(WIDTH / 2f - 35, 0), new Vector2f(WIDTH / 2f - 35, 100)));
 	}
 
 	public Scene drawFrame(int delta) {
 		GL11.glClear(GL11.GL_COLOR_BUFFER_BIT | GL11.GL_DEPTH_BUFFER_BIT);
 		Vector2f coordinates = new Vector2f(Game.ui.getMouseLocation());
 
-		if (player.isActive()) firePlayerBullets(gotClick);
-		marker.setLocation(coordinates);
+		firePlayerBullets(gotClick);
+		updateReticle(coordinates);
 		updateGame(delta);
 		collideAndHit();
 		deactivate();
 		draw();
 
-		adjustBackgrounds(background1, background2);
 		return this;
 	}
 
 	private void firePlayerBullets(boolean gotClick) {
-		if (gotClick && player.bulletTimer >= player.bulletRate) {
-			fireBullet(player, marker);
+		if (player.isActive() && gotClick && player.bulletTimer >= player.bulletRate) {
+			fireBullet(player, reticle);
 			player.bulletTimer = 0;
 		}
+	}
+
+	private void updateReticle(Vector2f coordinates) {
+		reticle.setLocation(coordinates);
 	}
 
 	private void updateGame(int delta) {
@@ -87,6 +90,7 @@ public class MainGame extends Game implements Scene {
 		update(enemyBullets, delta);
 		update(enemies, delta);
 		updateEffects(effects, delta);
+		updateBackgrounds(background1, background2);
 	}
 
 	private void collideAndHit() {
@@ -105,7 +109,7 @@ public class MainGame extends Game implements Scene {
 	private void draw() {
 		background.draw(background1);
 		background.draw(background2);
-		marker.draw();
+		reticle.draw();
 		if (player.isActive()) player.draw();
 		draw(enemies);
 		draw(bullets);
@@ -192,8 +196,8 @@ public class MainGame extends Game implements Scene {
 	private void fireBullet(Player player, Reticle reticle) {
 		Vector2f targetLocation = reticle.getLocation();
 		Vector2f playerLocation = player.getLocation();
-		targetLocation.x -= reticle.getHitbox().width / 2;
-		targetLocation.y -= reticle.getHitbox().height / 2;
+		targetLocation.x -= reticle.getHitbox().width / 2f;
+		targetLocation.y -= reticle.getHitbox().height / 2f;
 		Vector2f direction = (targetLocation.subtract(playerLocation));
 		direction.normalize();
 		Vector2f location = new Vector2f(playerLocation);
@@ -206,7 +210,7 @@ public class MainGame extends Game implements Scene {
 		bullets.add(bullet);
 	}
 
-	private void adjustBackgrounds(Background one, Background two) {
+	private void updateBackgrounds(Background one, Background two) {
 		one.getHitbox().y += SCROLL_SPEED;
 		two.getHitbox().y += SCROLL_SPEED;
 		if (one.getHitbox().y >= HEIGHT) one.setHeight(-HEIGHT);

@@ -10,11 +10,14 @@ public class Reticle extends GameObject
 	private Vector2f location;
 	private Texture texture;
 
+	public Reticle() {
+		this.texture = new Texture("res/reticle.png");
+	}
+
 	public void setLocation(Vector2f location)
 	{
 		this.hitbox.setBounds((int) location.x, (int) location.y, 20, 20);
 		this.location = location;
-		this.texture = new Texture("res/reticle.png");
 	}
 
 	public Vector2f getLocation() {
@@ -29,16 +32,5 @@ public class Reticle extends GameObject
 	@Override
 	public void draw() {
 		texture.draw(this);
-	}
-
-	private void checkBounds() {
-		if (location.x + hitbox.width > Game.ui.getWidth()) {
-			location.x = Game.ui.getWidth() - hitbox.width;
-		}
-		if (location.y + hitbox.height > Game.ui.getHeight()) {
-			location.y = Game.ui.getHeight() - hitbox.height;
-		}
-		if (location.x < 0) location.x = 0;
-		if (location.y < 0) location.y = 0;
 	}
 }

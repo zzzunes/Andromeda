@@ -23,9 +23,9 @@ public class Eye extends Enemy {
 		this.destinationReached = false;
 		this.bulletTimer = 0;
 		this.bulletRate = delay;
-		this.bulletSpeed = .05f;
+		this.bulletSpeed = .3f;
 		this.circlePosition = 0;
-		this.bulletsPerFrame = 2;
+		this.bulletsPerFrame = 7;
 		this.pattern = pattern;
 	}
 
