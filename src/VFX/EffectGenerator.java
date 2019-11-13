@@ -7,13 +7,13 @@ import java.awt.*;
 import java.util.ArrayList;
 
 public class EffectGenerator {
-	public static Effect generateHitExplosion(Bullet bullet) {
+	public static Effect generateHitExplosion(GameObject obj) {
 		return new StaticEffect(
 				"res/pow.png",
 				1000,
-				new Rectangle(bullet.getHitbox().x
-						- (bullet.getHitbox().width / 2),
-						bullet.getHitbox().y - (bullet.getHitbox().height / 2),
+				new Rectangle(obj.getHitbox().x
+						- (obj.getHitbox().width / 2),
+						obj.getHitbox().y - (obj.getHitbox().height / 2),
 						30, 30));
 	}
 

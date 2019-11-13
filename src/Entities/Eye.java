@@ -1,5 +1,6 @@
 package Entities;
 
+import java.util.Random;
 import Game.MainGame;
 import Tools.Vector2f;
 import VFX.Effect;
@@ -13,20 +14,23 @@ public class Eye extends Enemy {
 	private int circlePosition;
 	private int bulletsPerFrame;
 	private Pattern pattern;
+	private boolean goingRight;
+	private boolean delayed;
 
 	public Eye(Vector2f position, Vector2f destination, String texture, Pattern pattern, int delay) {
 		super(destination, texture);
 		this.pos = position;
 		this.hitbox.setBounds((int) pos.x, (int) pos.y, 70, 70);
-		this.health = 300;
+		this.health = 600;
 		this.speed = .03f;
 		this.destinationReached = false;
 		this.bulletTimer = 0;
-		this.bulletRate = delay;
+		this.bulletDelay = delay;
 		this.bulletSpeed = .3f;
-		this.circlePosition = 0;
-		this.bulletsPerFrame = 7;
 		this.pattern = pattern;
+		this.bulletsPerFrame = 10;
+		this.goingRight = true;
+		this.delayed = false;
 	}
 
 	@Override
@@ -41,24 +45,56 @@ public class Eye extends Enemy {
 			if (destinationReached) destination = pos.add(new Vector2f(0, 500));
 		}
 		else {
-			if (pattern == Pattern.SPIRAL) fireSpiral();
-			if (pattern == Pattern.CIRCLE && bulletTimer > bulletRate) {
-				fireCircle();
+			if (!delayed && bulletTimer >= bulletDelay) {
+				delayed = true;
 				bulletTimer = 0;
 			}
-			if (pattern == Pattern.OCTO && bulletTimer > bulletRate) {
-				fireOcto();
+			if (delayed && bulletTimer >= bulletDelay) {
+				delayed = false;
 				bulletTimer = 0;
+			}
+			if (bulletTimer < bulletDelay && !delayed) {
+				fire();
 			}
 		}
 
 		adjustHitBox();
+		if (goingRight && hitbox.x + hitbox.width >= Game.MainGame.ui.getWidth()) {
+			goingRight = false;
+		}
+		else if (!goingRight && hitbox.x <= 0) {
+			goingRight = true;
+		}
+		if (goingRight && destinationReached) {
+			destination = new Vector2f(pos);
+			destination.x += 100;
+			goToDestination(delta);
+		}
+		if (!goingRight && destinationReached) {
+			destination = new Vector2f(pos);
+			destination.x -= 100;
+			goToDestination(delta);
+		}
 	}
 
-	private void fireSpiral() {
+	private void fire() {
+		switch (pattern) {
+			case STAR:
+				fireStar();
+				break;
+			case OCTO:
+				fireOcto();
+				break;
+			case CIRCLE:
+				fireCircle();
+				break;
+		}
+	}
+
+	private void fireStar() {
 		Vector2f center = new Vector2f(pos.x + hitbox.width / 2f, pos.y + hitbox.height / 2f);
 		for (int i = 0; i < bulletsPerFrame; i++) {
-			circlePosition++;
+			circlePosition += 25;
 			if (circlePosition > 360) circlePosition = 0;
 			float x = hitbox.width * (float) Math.cos(circlePosition * Math.PI / 180);
 			float y = hitbox.width * (float) Math.sin(circlePosition * Math.PI / 180);

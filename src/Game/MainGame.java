@@ -52,17 +52,14 @@ public class MainGame extends Game implements Scene {
 		music = new BackgroundMusic("cruelAngelThesis");
 		music.start();
 		GLFW.glfwSetMouseButtonCallback(Game.ui.getWindow(), clickback);
-		enemies.add(EnemyGenerator.generateEyeSpiral(new Vector2f(-100 - 70, 100), new Vector2f(200, 100)));
-		//enemies.add(EnemyGenerator.generateEyeCircle(new Vector2f(WIDTH + 100, 100), new Vector2f(WIDTH - 200 - 70, 100)));
+		enemies.add(EnemyGenerator.generateEyeStar(new Vector2f(-100 - 70, 100), new Vector2f(200, 100)));
 		//enemies.add(EnemyGenerator.generateEyeOcto(new Vector2f(WIDTH / 2f - 35, 0), new Vector2f(WIDTH / 2f - 35, 100)));
 	}
 
 	public Scene drawFrame(int delta) {
 		GL11.glClear(GL11.GL_COLOR_BUFFER_BIT | GL11.GL_DEPTH_BUFFER_BIT);
-		Vector2f coordinates = new Vector2f(Game.ui.getMouseLocation());
 
-		firePlayerBullets(gotClick);
-		updateReticle(coordinates);
+		firePlayerBullets();
 		updateGame(delta);
 		collideAndHit();
 		deactivate();
@@ -71,15 +68,11 @@ public class MainGame extends Game implements Scene {
 		return this;
 	}
 
-	private void firePlayerBullets(boolean gotClick) {
-		if (player.isActive() && gotClick && player.bulletTimer >= player.bulletRate) {
-			fireBullet(player, reticle);
+	private void firePlayerBullets() {
+		if (player.isActive() && Game.ui.keyPressed(GLFW.GLFW_KEY_SPACE) && player.bulletTimer >= player.bulletRate) {
+			fireBullet(player);
 			player.bulletTimer = 0;
 		}
-	}
-
-	private void updateReticle(Vector2f coordinates) {
-		reticle.setLocation(coordinates);
 	}
 
 	private void updateGame(int delta) {
@@ -95,21 +88,22 @@ public class MainGame extends Game implements Scene {
 
 	private void collideAndHit() {
 		detectHits(bullets, enemies);
-		if (player.isActive()) detectHitsPlayer(enemyBullets, player);
+		if (player.isActive()) {
+			detectHits(enemies, player);
+			detectHitsPlayer(enemyBullets, player);
+		}
 	}
 
 	private void deactivate() {
 		deactivate(bullets);
 		deactivate(enemyBullets);
 		deactivate(enemies);
-		cancelBullets(bullets, enemyBullets);
 		stopEffects(effects);
 	}
 
 	private void draw() {
 		background.draw(background1);
 		background.draw(background2);
-		reticle.draw();
 		if (player.isActive()) player.draw();
 		draw(enemies);
 		draw(bullets);
@@ -172,6 +166,15 @@ public class MainGame extends Game implements Scene {
 		}
 	}
 
+	private void detectHits(List<Enemy> enemies, Player player) {
+		for (Enemy enemy : enemies) {
+			if (player.getHitbox().intersects(enemy.getHitbox())) {
+				effects.add(EffectGenerator.generateHitExplosion(player));
+				player.takeHit();
+			}
+		}
+	}
+
 	private void detectHitsPlayer(List<Bullet> bullets, Player player) {
 		for (Bullet bullet : bullets) {
 			if (bullet.getHitbox().intersects(player.getHitbox())) {
@@ -182,22 +185,11 @@ public class MainGame extends Game implements Scene {
 		}
 	}
 
-	public void cancelBullets(List<Bullet> playerBullets, List<Bullet> enemyBullets) {
-		for (Bullet pBullets : playerBullets) {
-			for (Bullet eBullet: enemyBullets) {
-				if (pBullets.getHitbox().intersects(eBullet.getHitbox())) {
-					pBullets.deactivate();
-					eBullet.deactivate();
-				}
-			}
-		}
-	}
-
-	private void fireBullet(Player player, Reticle reticle) {
-		Vector2f targetLocation = reticle.getLocation();
+	private void fireBullet(Player player) {
 		Vector2f playerLocation = player.getLocation();
-		targetLocation.x -= reticle.getHitbox().width / 2f;
-		targetLocation.y -= reticle.getHitbox().height / 2f;
+		Vector2f targetLocation = new Vector2f(0, 0);
+		targetLocation.x += playerLocation.x;
+		targetLocation.y -= playerLocation.y - (player.getHitbox().height / 2f);
 		Vector2f direction = (targetLocation.subtract(playerLocation));
 		direction.normalize();
 		Vector2f location = new Vector2f(playerLocation);

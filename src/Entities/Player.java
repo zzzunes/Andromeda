@@ -27,7 +27,7 @@ public class Player extends GameObject {
 		this.texture = new Texture("res/spaceship.png");
 		this.hp = 50;
 		this.bulletTimer = 0;
-		this.bulletRate = 40;
+		this.bulletRate = 30;
 	}
 
 	public Vector2f getLocation() {

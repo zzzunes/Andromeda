@@ -12,11 +12,11 @@ public abstract class Enemy extends GameObject {
 	protected float health;
 	protected float speed;
 	protected int bulletTimer;
-	protected int bulletRate;
+	protected int bulletDelay;
 	protected float bulletSpeed;
 
 	public static enum Pattern {
-		SPIRAL,
+		STAR,
 		CIRCLE,
 		OCTO
 	}
