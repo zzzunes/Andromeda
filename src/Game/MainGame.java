@@ -29,6 +29,8 @@ public class MainGame extends Game implements Scene {
 	private Background background2;
 	private Background pauseBackground;
 	private Text pauseText;
+	private Text scoreText;
+	private Text pauseScoreText;
 	private Player player;
 	private List<Bullet> bullets;
 	private List<Enemy> enemies;
@@ -36,6 +38,7 @@ public class MainGame extends Game implements Scene {
 	private List<Background> backgrounds;
 	private BackgroundMusic music;
 	private boolean paused;
+	private int score;
 	public static List<Effect> effects;
 	public static List<Bullet> enemyBullets;
 
@@ -47,6 +50,9 @@ public class MainGame extends Game implements Scene {
 		background2 = new Background(0, -HEIGHT, WIDTH, HEIGHT, "deepspace2.png");
 		pauseBackground = new Background(0, 0, WIDTH, HEIGHT, "gray.png");
 		pauseText = new Text(HALF_WIDTH - 60, HALF_HEIGHT - 140, 40, 30, "PAUSED");
+		score = 0;
+		scoreText = new Text(0, HEIGHT - 50, 15, 10, "Score:" + score);
+		pauseScoreText = new Text(HALF_WIDTH - 60, HALF_HEIGHT - 80, 40, 30, "Score:" + score);
 		paused = false;
 		player = new Player(new Vector2f(WIDTH / 2f, HEIGHT / 2f));
 		bullets = new ArrayList<>();
@@ -61,14 +67,14 @@ public class MainGame extends Game implements Scene {
 		GLFW.glfwSetKeyCallback(Game.ui.getWindow(), pause);
 		music = new BackgroundMusic("cruelAngelThesis");
 		music.start();
-		enemies.add(EnemyGenerator.generateEyeStar(new Vector2f(HALF_WIDTH - 35, -100), new Vector2f(HALF_WIDTH- 35, 100)));
+		enemies.add(EnemyGenerator.generateEyeStar(new Vector2f(HALF_WIDTH - 35, -100), new Vector2f(HALF_WIDTH - 35, 100)));
 	}
 
 	public Scene drawFrame(int delta) {
 		GL11.glClear(GL11.GL_COLOR_BUFFER_BIT | GL11.GL_DEPTH_BUFFER_BIT);
 
 		if (paused) pauseScreen();
-		else activeGame(delta);
+		else runGame(delta);
 
 		return this;
 	}
@@ -81,9 +87,10 @@ public class MainGame extends Game implements Scene {
 		draw();
 		pauseBackground.draw();
 		pauseText.draw();
+		pauseScoreText.draw();
 	}
 
-	private void activeGame(int delta) {
+	private void runGame(int delta) {
 		firePlayerBullets();
 		updateGame(delta);
 		deactivate();
@@ -110,6 +117,7 @@ public class MainGame extends Game implements Scene {
 		update(enemies, delta);
 		updateEffects(effects, delta);
 		updateBackgrounds(backgrounds);
+		updateScore();
 	}
 
 	private void collideAndHit() {
@@ -132,6 +140,7 @@ public class MainGame extends Game implements Scene {
 		draw(bullets);
 		draw(enemyBullets);
 		drawEffects(effects);
+		scoreText.draw();
 	}
 
 	private <T extends GameObject> void update(List<T> gameObjects, int delta) {
@@ -172,6 +181,7 @@ public class MainGame extends Game implements Scene {
 				if (bullet.getHitbox().intersects(enemy.getHitbox())) {
 					bullet.deactivate();
 					enemy.damage(1);
+					if (enemy.readyToDie()) score += enemy.getPoints();
 					effects.add(EffectGenerator.generateHitExplosion(bullet));
 				}
 			}
@@ -228,6 +238,11 @@ public class MainGame extends Game implements Scene {
 			background.getHitbox().y += SCROLL_SPEED;
 			if (background.getHitbox().y >= HEIGHT) background.setHeight(-HEIGHT);
 		}
+	}
+
+	private void updateScore() {
+		scoreText = new Text(0, HEIGHT - 50, 30, 25, "Score: " + score);
+		pauseScoreText = new Text(HALF_WIDTH - 60, HALF_HEIGHT - 80, 40, 30, "Score: " + score);
 	}
 
 	/* ******************************************************************** */

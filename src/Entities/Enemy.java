@@ -14,6 +14,7 @@ public abstract class Enemy extends GameObject {
 	protected int bulletTimer;
 	protected int bulletDelay;
 	protected float bulletSpeed;
+	protected int points;
 
 	public static enum Pattern {
 		STAR,
@@ -48,4 +49,12 @@ public abstract class Enemy extends GameObject {
 	}
 
 	protected abstract void die();
+
+	public int getPoints() {
+		return points;
+	}
+
+	public boolean readyToDie() {
+		return health <= 0;
+	}
 }
