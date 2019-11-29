@@ -8,7 +8,7 @@ import VFX.Effect;
 import VFX.EffectGenerator;
 import edu.utc.game.*;
 import org.lwjgl.glfw.GLFW;
-import org.lwjgl.glfw.GLFWMouseButtonCallback;
+import org.lwjgl.glfw.GLFWKeyCallback;
 import org.lwjgl.opengl.GL11;
 
 import java.util.*;
@@ -29,7 +29,8 @@ public class MainGame extends Game implements Scene {
 	private Player player;
 	private List<Bullet> bullets;
 	private List<Enemy> enemies;
-	private boolean gotClick;
+	private List<Player> playerTeam;
+	private boolean gotFire;
 	private BackgroundMusic music;
 	public static List<Effect> effects;
 	public static List<Bullet> enemyBullets;
@@ -46,10 +47,11 @@ public class MainGame extends Game implements Scene {
 		enemyBullets = new ArrayList<>();
 		enemies = new ArrayList<>();
 		effects = new ArrayList<>();
-		gotClick = false;
+		playerTeam = new ArrayList<>();
+		playerTeam.add(player);
+		gotFire = false;
 		music = new BackgroundMusic("cruelAngelThesis");
 		music.start();
-		GLFW.glfwSetMouseButtonCallback(Game.ui.getWindow(), clickback);
 		enemies.add(EnemyGenerator.generateEyeStar(new Vector2f((Game.ui.getWidth()/2f) - 35, -100), new Vector2f((Game.ui.getWidth()/2f) - 35, 100)));
 	}
 
@@ -66,16 +68,15 @@ public class MainGame extends Game implements Scene {
 	}
 
 	private void firePlayerBullets() {
-		if (player.isActive() && Game.ui.keyPressed(GLFW.GLFW_KEY_SPACE) && player.bulletTimer >= player.bulletRate) {
-			fireBullet(player);
-			player.bulletTimer = 0;
+		for (Player player : playerTeam) {
+			if (Game.ui.keyPressed(GLFW.GLFW_KEY_SPACE) && player.bulletTimer >= player.bulletRate) {
+				fireBullet(player);
+			}
 		}
 	}
 
 	private void updateGame(int delta) {
-		if (player.isActive()) {
-			player.update(delta);
-		}
+		update(playerTeam, delta);
 		update(bullets, delta);
 		update(enemyBullets, delta);
 		update(enemies, delta);
@@ -85,13 +86,11 @@ public class MainGame extends Game implements Scene {
 
 	private void collideAndHit() {
 		detectHits(bullets, enemies);
-		if (player.isActive()) {
-			detectHits(enemies, player);
-			detectHitsPlayer(enemyBullets, player);
-		}
+		detectPlayerDamage(playerTeam);
 	}
 
 	private void deactivate() {
+		deactivate(playerTeam);
 		deactivate(bullets);
 		deactivate(enemyBullets);
 		deactivate(enemies);
@@ -101,7 +100,7 @@ public class MainGame extends Game implements Scene {
 	private void draw() {
 		background.draw(background1);
 		background.draw(background2);
-		if (player.isActive()) player.draw();
+		draw(playerTeam);
 		draw(enemies);
 		draw(bullets);
 		draw(enemyBullets);
@@ -140,17 +139,6 @@ public class MainGame extends Game implements Scene {
 		effects.removeIf(effect -> !effect.isActive());
 	}
 
-	private GLFWMouseButtonCallback clickback = new GLFWMouseButtonCallback() {
-		public void invoke(long window, int button, int action, int mods)
-		{
-			if (gotClick && action == GLFW.GLFW_RELEASE) {
-				gotClick = false;
-			}
-			if (button == 0 && action == GLFW.GLFW_PRESS) {
-				gotClick = true;
-			}
-		}};
-
 	private void detectHits(List<Bullet> bullets, List<Enemy> enemies) {
 		for (Bullet bullet : bullets) {
 			for (Enemy enemy : enemies) {
@@ -182,6 +170,13 @@ public class MainGame extends Game implements Scene {
 		}
 	}
 
+	private void detectPlayerDamage(List<Player> players) {
+		for (Player player : players) {
+			detectHits(enemies, player);
+			detectHitsPlayer(enemyBullets, player);
+		}
+	}
+
 	private void fireBullet(Player player) {
 		Vector2f playerLocation = player.getLocation();
 		Vector2f targetLocation = new Vector2f(0, 0);
@@ -198,6 +193,7 @@ public class MainGame extends Game implements Scene {
 		Bullet bullet = new Bullet(location, direction, speed, "res/Bullets/playerBullet.png");
 		bullet.setSize(15, 30);
 		bullets.add(bullet);
+		player.bulletTimer = 0;
 	}
 
 	private void updateBackgrounds(Background one, Background two) {

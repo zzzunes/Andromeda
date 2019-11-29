@@ -24,7 +24,7 @@ public class Eye extends Enemy {
 		this.pos = position;
 		this.hitbox.setBounds((int) pos.x, (int) pos.y, 70, 70);
 		this.health = 600;
-		this.speed = .07f;
+		this.speed = .05f;
 		this.destinationReached = false;
 		this.bulletTimer = 0;
 		this.bulletDelay = delay;
