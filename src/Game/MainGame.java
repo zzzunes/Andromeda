@@ -8,7 +8,6 @@ import VFX.Effect;
 import VFX.EffectGenerator;
 import edu.utc.game.*;
 import org.lwjgl.glfw.GLFW;
-import org.lwjgl.glfw.GLFWKeyCallback;
 import org.lwjgl.opengl.GL11;
 
 import java.util.*;
@@ -25,7 +24,6 @@ public class MainGame extends Game implements Scene {
 	private static final int SCROLL_SPEED = 10;
 	private Background background1;
 	private Background background2;
-	private Texture background;
 	private Player player;
 	private List<Bullet> bullets;
 	private List<Enemy> enemies;

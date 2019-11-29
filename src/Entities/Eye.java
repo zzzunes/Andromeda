@@ -18,53 +18,67 @@ public class Eye extends Enemy {
 	private boolean delayed;
 	private int patternTimer;
 	private int patternMaxTime;
+	private boolean halfAwake;
+	private boolean awake;
+	private boolean canFire;
 
 	public Eye(Vector2f position, Vector2f destination, String texture, Pattern pattern, int delay) {
 		super(destination, texture);
 		this.pos = position;
 		this.hitbox.setBounds((int) pos.x, (int) pos.y, 70, 70);
 		this.health = 600;
-		this.speed = .05f;
+		this.speed = .04f;
 		this.destinationReached = false;
 		this.bulletTimer = 0;
 		this.bulletDelay = delay;
-		this.bulletSpeed = .5f;
+		this.bulletSpeed = .8f;
 		this.pattern = pattern;
 		this.bulletsPerFrame = 40;
 		this.goingRight = true;
 		this.delayed = false;
 		this.patternTimer = 0;
-		this.patternMaxTime = 8000;
+		this.patternMaxTime = 4000;
+		this.halfAwake = false;
+		this.awake = false;
+		this.canFire = false;
 	}
 
 	@Override
 	public void update(int delta) {
 		bulletTimer += delta;
 		patternTimer += delta;
+		if (health < 600) canFire = true;
 		if (patternTimer >= patternMaxTime) {
 			switchPattern();
-			patternTimer = 0;
 		}
 		if (health <= 0) die();
-		else if (health < 50) texture = new Texture("res/Enemy/eyeopen.png");
-		else if (health < 200) texture = new Texture("res/Enemy/eyehalf.png");
+		else if (health < 150 && !awake) {
+			texture = new Texture("res/Enemy/eyeopen.png");
+			increaseDifficulty();
+			moveBottomTop();
+			awake = true;
+		}
+		else if (health < 300 && !halfAwake) {
+			texture = new Texture("res/Enemy/eyehalf.png");
+			increaseDifficulty();
+			moveMiddle();
+			halfAwake = true;
+		}
 		if (!destinationReached) {
 			goToDestination(delta);
 			destinationReached = pos.distanceTo(destination) <= 1f;
 			if (destinationReached) destination = pos.add(new Vector2f(0, 500));
 		}
-		else {
-			if (!delayed && bulletTimer >= bulletDelay) {
-				delayed = true;
-				bulletTimer = 0;
-			}
-			if (delayed && bulletTimer >= bulletDelay) {
-				delayed = false;
-				bulletTimer = 0;
-			}
-			if (bulletTimer < bulletDelay && !delayed) {
-				fire();
-			}
+		if (!delayed && bulletTimer >= bulletDelay) {
+			delayed = true;
+			bulletTimer = 0;
+		}
+		if (delayed && bulletTimer >= bulletDelay) {
+			delayed = false;
+			bulletTimer = 0;
+		}
+		if (bulletTimer < bulletDelay && !delayed) {
+			if (canFire) fire();
 		}
 
 		adjustHitBox();
@@ -109,6 +123,24 @@ public class Eye extends Enemy {
 				pattern = Pattern.STAR;
 				break;
 		}
+		patternTimer = 0;
+	}
+
+	private void increaseDifficulty() {
+		speed *= 1.5f;
+		bulletDelay *= 1.1f;
+		patternMaxTime /= 1.5f;
+		bulletSpeed *= 1.1f;
+	}
+
+	private void moveMiddle() {
+		destinationReached = false;
+		destination = new Vector2f((MainGame.ui.getWidth()/2f)-35, (MainGame.ui.getHeight()/2f)-100);
+	}
+
+	private void moveBottomTop() {
+		destinationReached = false;
+		destination = new Vector2f((MainGame.ui.getWidth()/2f)-35, 100);
 	}
 
 	private void fireStar() {
