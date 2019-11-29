@@ -19,11 +19,11 @@ public class Bullet extends GameObject {
 		this.texture = new Texture("res/Bullets/roundBullet.png");
 	}
 
-	public Bullet(Vector2f position, Vector2f direction, String texturePath) {
+	public Bullet(Vector2f position, Vector2f direction, float speed, String texturePath) {
 		this.pos = position;
 		this.dir = direction;
 		this.hitbox.setBounds((int) pos.x, (int) pos.y, 10, 10);
-		this.speed = 1f;
+		this.speed = speed;
 		this.texture = new Texture(texturePath);
 	}
 
@@ -35,6 +35,11 @@ public class Bullet extends GameObject {
 		hitbox.y = (int) pos.y;
 
 		if (pos.x < 0 || pos.x > Game.ui.getWidth() || pos.y < 0 || pos.y > Game.ui.getHeight()) deactivate();
+	}
+
+	public void setSize(int width, int height) {
+		hitbox.width = width;
+		hitbox.height = height;
 	}
 
 	@Override

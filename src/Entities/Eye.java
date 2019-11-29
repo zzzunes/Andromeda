@@ -16,26 +16,35 @@ public class Eye extends Enemy {
 	private Pattern pattern;
 	private boolean goingRight;
 	private boolean delayed;
+	private int patternTimer;
+	private int patternMaxTime;
 
 	public Eye(Vector2f position, Vector2f destination, String texture, Pattern pattern, int delay) {
 		super(destination, texture);
 		this.pos = position;
 		this.hitbox.setBounds((int) pos.x, (int) pos.y, 70, 70);
 		this.health = 600;
-		this.speed = .03f;
+		this.speed = .07f;
 		this.destinationReached = false;
 		this.bulletTimer = 0;
 		this.bulletDelay = delay;
-		this.bulletSpeed = .3f;
+		this.bulletSpeed = .5f;
 		this.pattern = pattern;
-		this.bulletsPerFrame = 10;
+		this.bulletsPerFrame = 40;
 		this.goingRight = true;
 		this.delayed = false;
+		this.patternTimer = 0;
+		this.patternMaxTime = 8000;
 	}
 
 	@Override
 	public void update(int delta) {
 		bulletTimer += delta;
+		patternTimer += delta;
+		if (patternTimer >= patternMaxTime) {
+			switchPattern();
+			patternTimer = 0;
+		}
 		if (health <= 0) die();
 		else if (health < 50) texture = new Texture("res/Enemy/eyeopen.png");
 		else if (health < 200) texture = new Texture("res/Enemy/eyehalf.png");
@@ -87,6 +96,17 @@ public class Eye extends Enemy {
 				break;
 			case CIRCLE:
 				fireCircle();
+				break;
+		}
+	}
+
+	private void switchPattern() {
+		switch (pattern) {
+			case STAR:
+				pattern = Pattern.OCTO;
+				break;
+			case OCTO:
+				pattern = Pattern.STAR;
 				break;
 		}
 	}

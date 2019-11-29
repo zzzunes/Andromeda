@@ -26,7 +26,6 @@ public class MainGame extends Game implements Scene {
 	private Background background1;
 	private Background background2;
 	private Texture background;
-	private Reticle reticle;
 	private Player player;
 	private List<Bullet> bullets;
 	private List<Enemy> enemies;
@@ -42,7 +41,6 @@ public class MainGame extends Game implements Scene {
 		background1 = new Background(0, 0, WIDTH, HEIGHT);
 		background2 = new Background(0, -HEIGHT, WIDTH, HEIGHT);
 		background = new Texture("res/Backgrounds/deepspace2.png");
-		reticle = new Reticle();
 		player = new Player(new Vector2f(WIDTH / 2f, HEIGHT / 2f));
 		bullets = new ArrayList<>();
 		enemyBullets = new ArrayList<>();
@@ -52,8 +50,7 @@ public class MainGame extends Game implements Scene {
 		music = new BackgroundMusic("cruelAngelThesis");
 		music.start();
 		GLFW.glfwSetMouseButtonCallback(Game.ui.getWindow(), clickback);
-		enemies.add(EnemyGenerator.generateEyeStar(new Vector2f(-100 - 70, 100), new Vector2f(200, 100)));
-		//enemies.add(EnemyGenerator.generateEyeOcto(new Vector2f(WIDTH / 2f - 35, 0), new Vector2f(WIDTH / 2f - 35, 100)));
+		enemies.add(EnemyGenerator.generateEyeStar(new Vector2f((Game.ui.getWidth()/2f) - 35, -100), new Vector2f((Game.ui.getWidth()/2f) - 35, 100)));
 	}
 
 	public Scene drawFrame(int delta) {
@@ -61,8 +58,8 @@ public class MainGame extends Game implements Scene {
 
 		firePlayerBullets();
 		updateGame(delta);
-		collideAndHit();
 		deactivate();
+		collideAndHit();
 		draw();
 
 		return this;
@@ -197,8 +194,9 @@ public class MainGame extends Game implements Scene {
 		location.y += player.getHitbox().height / 3f;
 		location.x += direction.x * (player.getHitbox().width / 1.5f);
 		location.y += direction.y * (player.getHitbox().height / 1.5f);
-		float speed = 1f;
-		Bullet bullet = new Bullet(location, direction, speed);
+		float speed = 1.75f;
+		Bullet bullet = new Bullet(location, direction, speed, "res/Bullets/playerBullet.png");
+		bullet.setSize(15, 30);
 		bullets.add(bullet);
 	}
 
