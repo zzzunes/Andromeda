@@ -30,7 +30,7 @@ public class MainGame extends Game implements Scene {
 	private List<Bullet> bullets;
 	private List<Enemy> enemies;
 	private List<Player> playerTeam;
-	private boolean gotFire;
+	private List<Background> backgrounds;
 	private BackgroundMusic music;
 	public static List<Effect> effects;
 	public static List<Bullet> enemyBullets;
@@ -39,17 +39,18 @@ public class MainGame extends Game implements Scene {
 		initUI(WIDTH, HEIGHT,"アンドロメダ");
 		Game.ui.enableMouseCursor(false);
 		GL11.glClearColor(0f, 0f, 0f, 0f);
-		background1 = new Background(0, 0, WIDTH, HEIGHT);
-		background2 = new Background(0, -HEIGHT, WIDTH, HEIGHT);
-		background = new Texture("res/Backgrounds/deepspace2.png");
+		background1 = new Background(0, 0, WIDTH, HEIGHT, "deepspace2.png");
+		background2 = new Background(0, -HEIGHT, WIDTH, HEIGHT, "deepspace2.png");
 		player = new Player(new Vector2f(WIDTH / 2f, HEIGHT / 2f));
 		bullets = new ArrayList<>();
 		enemyBullets = new ArrayList<>();
 		enemies = new ArrayList<>();
 		effects = new ArrayList<>();
+		backgrounds = new ArrayList<>();
 		playerTeam = new ArrayList<>();
 		playerTeam.add(player);
-		gotFire = false;
+		backgrounds.add(background1);
+		backgrounds.add(background2);
 		music = new BackgroundMusic("cruelAngelThesis");
 		music.start();
 		enemies.add(EnemyGenerator.generateEyeStar(new Vector2f((Game.ui.getWidth()/2f) - 35, -100), new Vector2f((Game.ui.getWidth()/2f) - 35, 100)));
@@ -81,7 +82,7 @@ public class MainGame extends Game implements Scene {
 		update(enemyBullets, delta);
 		update(enemies, delta);
 		updateEffects(effects, delta);
-		updateBackgrounds(background1, background2);
+		updateBackgrounds(backgrounds);
 	}
 
 	private void collideAndHit() {
@@ -98,8 +99,7 @@ public class MainGame extends Game implements Scene {
 	}
 
 	private void draw() {
-		background.draw(background1);
-		background.draw(background2);
+		draw(backgrounds);
 		draw(playerTeam);
 		draw(enemies);
 		draw(bullets);
@@ -196,10 +196,10 @@ public class MainGame extends Game implements Scene {
 		player.bulletTimer = 0;
 	}
 
-	private void updateBackgrounds(Background one, Background two) {
-		one.getHitbox().y += SCROLL_SPEED;
-		two.getHitbox().y += SCROLL_SPEED;
-		if (one.getHitbox().y >= HEIGHT) one.setHeight(-HEIGHT);
-		if (two.getHitbox().y >= HEIGHT) two.setHeight(-HEIGHT);
+	private void updateBackgrounds(List<Background> backgrounds) {
+		for (Background background : backgrounds) {
+			background.getHitbox().y += SCROLL_SPEED;
+			if (background.getHitbox().y >= HEIGHT) background.setHeight(-HEIGHT);
+		}
 	}
 }
