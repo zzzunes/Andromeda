@@ -22,4 +22,8 @@ public class BackgroundMusic {
 		stop();
 		song = new Sound(soundPath);
 	}
+
+	public void pause() {
+		song.pause();
+	}
 }

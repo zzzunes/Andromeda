@@ -58,6 +58,10 @@ public class Sound {
 	{
 		AL10.alSourceStop(soundID);
 	}
+
+	public void pause() {
+		AL10.alSourcePause(soundID);
+	}
 	
 	public void setGain(float g)
 	{

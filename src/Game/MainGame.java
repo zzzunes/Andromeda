@@ -8,6 +8,7 @@ import VFX.Effect;
 import VFX.EffectGenerator;
 import edu.utc.game.*;
 import org.lwjgl.glfw.GLFW;
+import org.lwjgl.glfw.GLFWKeyCallback;
 import org.lwjgl.opengl.GL11;
 
 import java.util.*;
@@ -22,14 +23,19 @@ public class MainGame extends Game implements Scene {
 	private static final int WIDTH = 600;
 	private static final int HEIGHT = 800;
 	private static final int SCROLL_SPEED = 10;
+	private static final int HALF_WIDTH = WIDTH / 2;
+	private static final int HALF_HEIGHT = HEIGHT / 2;
 	private Background background1;
 	private Background background2;
+	private Background pauseBackground;
+	private Text pauseText;
 	private Player player;
 	private List<Bullet> bullets;
 	private List<Enemy> enemies;
 	private List<Player> playerTeam;
 	private List<Background> backgrounds;
 	private BackgroundMusic music;
+	private boolean paused;
 	public static List<Effect> effects;
 	public static List<Bullet> enemyBullets;
 
@@ -39,6 +45,9 @@ public class MainGame extends Game implements Scene {
 		GL11.glClearColor(0f, 0f, 0f, 0f);
 		background1 = new Background(0, 0, WIDTH, HEIGHT, "deepspace2.png");
 		background2 = new Background(0, -HEIGHT, WIDTH, HEIGHT, "deepspace2.png");
+		pauseBackground = new Background(0, 0, WIDTH, HEIGHT, "gray.png");
+		pauseText = new Text(HALF_WIDTH - 60, HALF_HEIGHT - 140, 40, 30, "PAUSED");
+		paused = false;
 		player = new Player(new Vector2f(WIDTH / 2f, HEIGHT / 2f));
 		bullets = new ArrayList<>();
 		enemyBullets = new ArrayList<>();
@@ -49,22 +58,42 @@ public class MainGame extends Game implements Scene {
 		playerTeam.add(player);
 		backgrounds.add(background1);
 		backgrounds.add(background2);
+		GLFW.glfwSetKeyCallback(Game.ui.getWindow(), pause);
 		music = new BackgroundMusic("cruelAngelThesis");
 		music.start();
-		enemies.add(EnemyGenerator.generateEyeStar(new Vector2f((Game.ui.getWidth()/2f) - 35, -100), new Vector2f((Game.ui.getWidth()/2f) - 35, 100)));
+		enemies.add(EnemyGenerator.generateEyeStar(new Vector2f(HALF_WIDTH - 35, -100), new Vector2f(HALF_WIDTH- 35, 100)));
 	}
 
 	public Scene drawFrame(int delta) {
 		GL11.glClear(GL11.GL_COLOR_BUFFER_BIT | GL11.GL_DEPTH_BUFFER_BIT);
 
+		if (paused) pauseScreen();
+		else activeGame(delta);
+
+		return this;
+	}
+
+	/* ******************************************************************** */
+	/* ********************** Game Scene Options Begin ******************** */
+	/* ******************************************************************** */
+
+	private void pauseScreen() {
+		draw();
+		pauseBackground.draw();
+		pauseText.draw();
+	}
+
+	private void activeGame(int delta) {
 		firePlayerBullets();
 		updateGame(delta);
 		deactivate();
 		collideAndHit();
 		draw();
-
-		return this;
 	}
+
+	/* ******************************************************************** */
+	/* ********************** Game Scene Options End ********************** */
+	/* ******************************************************************** */
 
 	private void firePlayerBullets() {
 		for (Player player : playerTeam) {
@@ -200,4 +229,26 @@ public class MainGame extends Game implements Scene {
 			if (background.getHitbox().y >= HEIGHT) background.setHeight(-HEIGHT);
 		}
 	}
+
+	/* ******************************************************************** */
+	/* ************************* Callback Functions *********************** */
+	/* ******************************************************************** */
+
+	GLFWKeyCallback pause = new GLFWKeyCallback() {
+		@Override
+		public void invoke(long window, int key, int scancode, int action, int mods) {
+			if (!paused && action == GLFW.GLFW_PRESS && key == GLFW.GLFW_KEY_BACKSPACE) {
+				paused = true;
+				music.pause();
+			}
+			else if (paused && action == GLFW.GLFW_PRESS && key == GLFW.GLFW_KEY_BACKSPACE) {
+				paused = false;
+				music.start();
+			}
+		}
+	};
+
+	/* ******************************************************************** */
+	/* ************************* Callback Functions *********************** */
+	/* ******************************************************************** */
 }
