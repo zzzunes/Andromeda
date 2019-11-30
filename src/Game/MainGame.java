@@ -25,6 +25,7 @@ public class MainGame extends Game implements Scene {
 	private static final int SCROLL_SPEED = 10;
 	private static final int HALF_WIDTH = WIDTH / 2;
 	private static final int HALF_HEIGHT = HEIGHT / 2;
+	private static final int FOLLOWER_COST = 1000;
 	private Background background1;
 	private Background background2;
 	private Background pauseBackground;
@@ -91,7 +92,7 @@ public class MainGame extends Game implements Scene {
 		GL11.glClear(GL11.GL_COLOR_BUFFER_BIT | GL11.GL_DEPTH_BUFFER_BIT);
 
 		if (gameOver) gameOverScreen();
-		if (leaderIsDead()) deathScreen(delta);
+		else if (leaderIsDead()) deathScreen(delta);
 		else if (paused) pauseScreen();
 		else runGame(delta);
 
@@ -119,6 +120,7 @@ public class MainGame extends Game implements Scene {
 		player.update(delta);
 		update(bullets, delta);
 		draw(bullets);
+		pauseBackground.draw();
 		pauseScoreText.draw();
 		deathText.draw();
 		continueYes.draw();
@@ -130,9 +132,13 @@ public class MainGame extends Game implements Scene {
 			playerTeam.add(player);
 			music.start();
 		}
+		if (Game.ui.keyPressed(GLFW.GLFW_KEY_X)) {
+			gameOver = true;
+		}
 	}
 
 	private void gameOverScreen() {
+		pauseBackground.draw();
 		// gameOverMusic.play();
 		// gameOverText.draw();
 		// pauseScoreText.draw();
@@ -165,6 +171,7 @@ public class MainGame extends Game implements Scene {
 	}
 
 	private void updateGame(int delta) {
+		purchaseFollowers();
 		update(playerTeam, delta);
 		update(bullets, delta);
 		update(enemyBullets, delta);
@@ -237,6 +244,7 @@ public class MainGame extends Game implements Scene {
 					enemy.damage(1);
 					if (enemy.readyToDie()) score += enemy.getPoints();
 					effects.add(EffectGenerator.generateHitExplosion(bullet));
+					score += 5;
 				}
 			}
 		}
@@ -291,6 +299,24 @@ public class MainGame extends Game implements Scene {
 		bullet.setSize(15, 30);
 		bullets.add(bullet);
 		player.bulletTimer = 0;
+	}
+
+	private void purchaseFollowers() {
+		/* P is for Purchase */
+		if (Game.ui.keyPressed(GLFW.GLFW_KEY_P)) {
+			if (!leftFollower.isActive() && score > FOLLOWER_COST) {
+				leftFollower.activate();
+				leftFollower.health = leftFollower.maxHealth;
+				playerTeam.add(leftFollower);
+				score -= FOLLOWER_COST;
+			}
+			else if (!rightFollower.isActive() && score > FOLLOWER_COST) {
+				rightFollower.activate();
+				rightFollower.health = rightFollower.maxHealth;
+				playerTeam.add(rightFollower);
+				score -= FOLLOWER_COST;
+			}
+		}
 	}
 
 	private void updateBackgrounds(List<Background> backgrounds) {

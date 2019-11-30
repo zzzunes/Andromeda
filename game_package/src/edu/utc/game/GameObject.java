@@ -27,6 +27,8 @@ public class GameObject {
 	
 	public boolean isActive() { return active; }
 	public void deactivate() { active=false; }
+
+	public void activate() { active=true; }
 	
 	public boolean intersects(GameObject other)
 	{
