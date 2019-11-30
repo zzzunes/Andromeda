@@ -31,6 +31,10 @@ public class MainGame extends Game implements Scene {
 	private Text pauseText;
 	private Text scoreText;
 	private Text pauseScoreText;
+	private Text deathText;
+	private Text continueYes;
+	private Text continueNo;
+	private Text gameOverText;
 	private Player player;
 	private Follower leftFollower;
 	private Follower rightFollower;
@@ -40,6 +44,8 @@ public class MainGame extends Game implements Scene {
 	private List<Background> backgrounds;
 	private BackgroundMusic music;
 	private boolean paused;
+	private boolean gameOver;
+	private boolean setupDeath;
 	private int score;
 	public static List<Effect> effects;
 	public static List<Bullet> enemyBullets;
@@ -55,7 +61,12 @@ public class MainGame extends Game implements Scene {
 		score = 0;
 		scoreText = new Text(0, HEIGHT - 50, 15, 10, "Score:" + score);
 		pauseScoreText = new Text(HALF_WIDTH - 60, HALF_HEIGHT - 80, 40, 30, "Score:" + score);
+		deathText = new Text(HALF_WIDTH-80, HALF_HEIGHT - 200, 40, 30, "Continue?");
+		continueYes = new Text(HALF_WIDTH-160, HALF_HEIGHT - 150, 40, 30, "Yes (Z)");
+		continueNo = new Text(HALF_WIDTH+60, HALF_HEIGHT - 150, 40, 30, "No (X)");
 		paused = false;
+		gameOver = false;
+		setupDeath = false;
 		player = new Player(new Vector2f(WIDTH / 2f, HEIGHT / 2f));
 		leftFollower = new Follower(player, true, "res/teamShip.png");
 		rightFollower = new Follower(player, false, "res/teamShip.png");
@@ -79,7 +90,9 @@ public class MainGame extends Game implements Scene {
 	public Scene drawFrame(int delta) {
 		GL11.glClear(GL11.GL_COLOR_BUFFER_BIT | GL11.GL_DEPTH_BUFFER_BIT);
 
-		if (paused) pauseScreen();
+		if (gameOver) gameOverScreen();
+		if (leaderIsDead()) deathScreen(delta);
+		else if (paused) pauseScreen();
 		else runGame(delta);
 
 		return this;
@@ -94,6 +107,35 @@ public class MainGame extends Game implements Scene {
 		pauseBackground.draw();
 		pauseText.draw();
 		pauseScoreText.draw();
+	}
+
+	private void deathScreen(int delta) {
+		if (!setupDeath) {
+			music.pause();
+			bullets.clear();
+			setupDeath = true;
+		}
+		singlePlayerBullet(player);
+		player.update(delta);
+		update(bullets, delta);
+		draw(bullets);
+		pauseScoreText.draw();
+		deathText.draw();
+		continueYes.draw();
+		continueNo.draw();
+		player.draw();
+		if (Game.ui.keyPressed(GLFW.GLFW_KEY_Z)) {
+			player.health = player.maxHealth;
+			player.activate();
+			playerTeam.add(player);
+			music.start();
+		}
+	}
+
+	private void gameOverScreen() {
+		// gameOverMusic.play();
+		// gameOverText.draw();
+		// pauseScoreText.draw();
 	}
 
 	private void runGame(int delta) {
@@ -113,6 +155,12 @@ public class MainGame extends Game implements Scene {
 			if (Game.ui.keyPressed(GLFW.GLFW_KEY_SPACE) && player.bulletTimer >= player.bulletRate) {
 				fireBullet(player);
 			}
+		}
+	}
+
+	private void singlePlayerBullet(Player player) {
+		if (Game.ui.keyPressed(GLFW.GLFW_KEY_SPACE) && player.bulletTimer >= player.bulletRate) {
+			fireBullet(player);
 		}
 	}
 
@@ -218,6 +266,14 @@ public class MainGame extends Game implements Scene {
 			detectHits(enemies, player);
 			detectHitsPlayer(enemyBullets, player);
 		}
+	}
+
+	private boolean leaderIsDead() {
+		boolean dead = true;
+		for (Player player : playerTeam) {
+			if (player.isLeader) dead = false;
+		}
+		return dead;
 	}
 
 	private void fireBullet(Player player) {
