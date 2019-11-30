@@ -4,6 +4,7 @@ import Tools.Vector2f;
 import VFX.Effect;
 import Game.MainGame;
 import VFX.EffectGenerator;
+import VFX.HealthBar;
 import edu.utc.game.Game;
 import edu.utc.game.GameObject;
 import edu.utc.game.Texture;
@@ -12,9 +13,11 @@ import org.lwjgl.glfw.GLFW;
 public class Player extends GameObject {
 	protected Vector2f pos;
 	protected Texture texture;
+	private HealthBar healthBar;
 	private Vector2f direction;
 	private float speed;
-	protected float hp;
+	public float hp;
+	public float maxHp;
 	public int bulletTimer;
 	public int bulletRate;
 	public float bulletSpeed;
@@ -26,7 +29,9 @@ public class Player extends GameObject {
 		this.speed = .3f;
 		this.direction = new Vector2f(0, 0);
 		this.texture = new Texture("res/spaceship.png");
+		this.healthBar = new HealthBar(100, this);
 		this.hp = 100;
+		this.maxHp = 100;
 		this.bulletTimer = 0;
 		this.bulletRate = 35;
 		this.bulletSpeed = 1.75f;
@@ -46,6 +51,7 @@ public class Player extends GameObject {
 		bulletTimer += delta;
 		direction = new Vector2f(0, 0);
 		if (hp <= 0) die();
+		healthBar.update(delta);
 		getMovementInput();
 		move(delta);
 		checkBounds();
@@ -91,6 +97,7 @@ public class Player extends GameObject {
 	@Override
 	public void draw() {
 		texture.draw(this);
+		healthBar.draw();
 	}
 
 	protected void die() {

@@ -6,7 +6,6 @@ import VFX.Background;
 import VFX.BackgroundMusic;
 import VFX.Effect;
 import VFX.EffectGenerator;
-import com.sun.javafx.tk.FontLoader;
 import edu.utc.game.*;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.glfw.GLFWKeyCallback;
@@ -246,8 +245,14 @@ public class MainGame extends Game implements Scene {
 	}
 
 	private void updateScore() {
+		int leftShift = 0;
+		int scoreCopy = score;
+		while (scoreCopy > 0) {
+			scoreCopy /= 10;
+			leftShift += 10;
+		}
 		scoreText = new Text(0, HEIGHT - 50, 30, 25, "Score: " + score);
-		pauseScoreText = new Text(HALF_WIDTH - 80, HALF_HEIGHT - 80, 40, 30, "Score: " + score);
+		pauseScoreText = new Text(HALF_WIDTH - 80  - leftShift, HALF_HEIGHT - 80, 40, 30, "Score: " + score);
 	}
 
 	/* ******************************************************************** */
