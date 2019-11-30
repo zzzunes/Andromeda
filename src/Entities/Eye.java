@@ -1,10 +1,10 @@
 package Entities;
 
-import java.util.Random;
 import Game.MainGame;
 import Tools.Vector2f;
 import VFX.Effect;
 import VFX.EffectGenerator;
+import VFX.EnemyHealthBar;
 import edu.utc.game.Texture;
 
 import java.util.ArrayList;
@@ -27,6 +27,8 @@ public class Eye extends Enemy {
 		this.pos = position;
 		this.hitbox.setBounds((int) pos.x, (int) pos.y, 70, 70);
 		this.health = 1200;
+		this.maxHealth = 1200;
+		this.healthBar = new EnemyHealthBar(100, this);
 		this.speed = .04f;
 		this.destinationReached = false;
 		this.bulletTimer = 0;
@@ -48,18 +50,19 @@ public class Eye extends Enemy {
 	public void update(int delta) {
 		bulletTimer += delta;
 		patternTimer += delta;
-		if (health < 1200) canFire = true;
+		healthBar.update(delta);
+		if (health < maxHealth) canFire = true;
 		if (patternTimer >= patternMaxTime) {
 			switchPattern();
 		}
 		if (health <= 0) die();
-		else if (health < 400 && !awake) {
+		else if (health < (maxHealth * .5f) && !awake) {
 			texture = new Texture("res/Enemy/eyeopen.png");
 			increaseDifficulty();
 			moveBottomTop();
 			awake = true;
 		}
-		else if (health < 800 && !halfAwake) {
+		else if (health < (maxHealth * .75f) && !halfAwake) {
 			texture = new Texture("res/Enemy/eyehalf.png");
 			increaseDifficulty();
 			moveMiddle();
@@ -209,5 +212,11 @@ public class Eye extends Enemy {
 		deactivate();
 		Effect explode = EffectGenerator.generateDeathExplosion(this);
 		MainGame.effects.add(explode);
+	}
+
+	@Override
+	public void draw() {
+		texture.draw(this);
+		healthBar.draw();
 	}
 }

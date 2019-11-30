@@ -5,9 +5,11 @@ import edu.utc.game.GameObject;
 import edu.utc.game.Texture;
 
 public class HealthBar extends GameObject {
-	private Texture healthBar;
-	private int percent;
+	protected Texture healthBar;
+	protected int percent;
 	private Player parent;
+
+	public HealthBar() {}
 
 	public HealthBar(int percent, Player player) {
 		this.healthBar = getHealthBar(percent);
@@ -17,7 +19,7 @@ public class HealthBar extends GameObject {
 
 	@Override
 	public void update(int delta) {
-		percent = (int) ((parent.hp / parent.maxHp) * 100);
+		percent = (int) ((parent.health / parent.maxHealth) * 100);
 		this.hitbox.setBounds((int) parent.getLocation().x - 15, (int) parent.getLocation().y + 32, 60, 20);
 		this.healthBar = getHealthBar(percent);
 	}
@@ -27,7 +29,7 @@ public class HealthBar extends GameObject {
 		healthBar.draw(this);
 	}
 
-	private Texture getHealthBar(int percent) {
+	protected Texture getHealthBar(int percent) {
 		Texture bar;
 		if (percent >= 90)
 			bar = new Texture("res/HealthBar/health10.png");

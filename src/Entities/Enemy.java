@@ -1,6 +1,7 @@
 package Entities;
 
 import Tools.Vector2f;
+import VFX.HealthBar;
 import edu.utc.game.Game;
 import edu.utc.game.GameObject;
 import edu.utc.game.Texture;
@@ -9,12 +10,14 @@ public abstract class Enemy extends GameObject {
 	protected Vector2f pos;
 	protected Vector2f destination;
 	protected Texture texture;
-	protected float health;
 	protected float speed;
 	protected int bulletTimer;
 	protected int bulletDelay;
 	protected float bulletSpeed;
 	protected int points;
+	protected HealthBar healthBar;
+	public float health;
+	public float maxHealth;
 
 	public static enum Pattern {
 		STAR,

@@ -16,8 +16,8 @@ public class Player extends GameObject {
 	private HealthBar healthBar;
 	private Vector2f direction;
 	private float speed;
-	public float hp;
-	public float maxHp;
+	public float health;
+	public float maxHealth;
 	public int bulletTimer;
 	public int bulletRate;
 	public float bulletSpeed;
@@ -30,8 +30,8 @@ public class Player extends GameObject {
 		this.direction = new Vector2f(0, 0);
 		this.texture = new Texture("res/spaceship.png");
 		this.healthBar = new HealthBar(100, this);
-		this.hp = 100;
-		this.maxHp = 100;
+		this.health = 100;
+		this.maxHealth = 100;
 		this.bulletTimer = 0;
 		this.bulletRate = 35;
 		this.bulletSpeed = 1.75f;
@@ -43,14 +43,14 @@ public class Player extends GameObject {
 	}
 
 	public void takeHit() {
-		this.hp--;
+		this.health--;
 	}
 
 	@Override
 	public void update(int delta) {
 		bulletTimer += delta;
 		direction = new Vector2f(0, 0);
-		if (hp <= 0) die();
+		if (health <= 0) die();
 		healthBar.update(delta);
 		getMovementInput();
 		move(delta);

@@ -16,7 +16,7 @@ public class Follower extends Player {
 		this.texture = new Texture(texturePath);
 		this.bulletTimer = leader.bulletTimer;
 		this.bulletRate = leader.bulletRate * 4;
-		this.hp = leader.hp;
+		this.health = leader.health;
 		this.isLeader = false;
 		this.bulletSpeed = player.bulletSpeed;
 	}
@@ -24,7 +24,7 @@ public class Follower extends Player {
 	@Override
 	public void update(int delta) {
 		bulletTimer += delta;
-		if (hp <= 0 || !leader.isActive()) die();
+		if (health <= 0 || !leader.isActive()) die();
 		float leaderX = leader.getLocation().x;
 		float leaderY = leader.getLocation().y;
 		pos.y = leaderY + 16;
