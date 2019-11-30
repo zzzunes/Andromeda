@@ -10,24 +10,27 @@ import edu.utc.game.Texture;
 import org.lwjgl.glfw.GLFW;
 
 public class Player extends GameObject {
-	private Vector2f pos;
+	protected Vector2f pos;
+	protected Texture texture;
 	private Vector2f direction;
-	private Texture texture;
 	private float speed;
-	private float hp;
+	protected float hp;
 	public int bulletTimer;
 	public int bulletRate;
+	public float bulletSpeed;
+	public boolean isLeader;
 
 	public Player(Vector2f position) {
 		this.pos = position;
 		this.hitbox.setBounds((int) pos.x, (int) pos.y, 32, 32);
-		this.setColor(1, 0, 0);
 		this.speed = .3f;
 		this.direction = new Vector2f(0, 0);
 		this.texture = new Texture("res/spaceship.png");
-		this.hp = 50;
+		this.hp = 100;
 		this.bulletTimer = 0;
 		this.bulletRate = 35;
+		this.bulletSpeed = 1.75f;
+		this.isLeader = true;
 	}
 
 	public Vector2f getLocation() {
@@ -80,7 +83,7 @@ public class Player extends GameObject {
 		if (pos.y < 0) pos.y = 0;
 	}
 
-	private void adjustHitBox() {
+	protected void adjustHitBox() {
 		hitbox.x = (int) pos.x;
 		hitbox.y = (int) pos.y;
 	}
@@ -90,7 +93,7 @@ public class Player extends GameObject {
 		texture.draw(this);
 	}
 
-	private void die() {
+	protected void die() {
 		deactivate();
 		Effect explode = EffectGenerator.generateDeathExplosion(this);
 		MainGame.effects.add(explode);

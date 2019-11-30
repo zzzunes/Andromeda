@@ -6,6 +6,7 @@ import VFX.Background;
 import VFX.BackgroundMusic;
 import VFX.Effect;
 import VFX.EffectGenerator;
+import com.sun.javafx.tk.FontLoader;
 import edu.utc.game.*;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.glfw.GLFWKeyCallback;
@@ -32,6 +33,8 @@ public class MainGame extends Game implements Scene {
 	private Text scoreText;
 	private Text pauseScoreText;
 	private Player player;
+	private Follower leftFollower;
+	private Follower rightFollower;
 	private List<Bullet> bullets;
 	private List<Enemy> enemies;
 	private List<Player> playerTeam;
@@ -55,6 +58,8 @@ public class MainGame extends Game implements Scene {
 		pauseScoreText = new Text(HALF_WIDTH - 60, HALF_HEIGHT - 80, 40, 30, "Score:" + score);
 		paused = false;
 		player = new Player(new Vector2f(WIDTH / 2f, HEIGHT / 2f));
+		leftFollower = new Follower(player, true, "res/teamShip.png");
+		rightFollower = new Follower(player, false, "res/teamShip.png");
 		bullets = new ArrayList<>();
 		enemyBullets = new ArrayList<>();
 		enemies = new ArrayList<>();
@@ -62,6 +67,8 @@ public class MainGame extends Game implements Scene {
 		backgrounds = new ArrayList<>();
 		playerTeam = new ArrayList<>();
 		playerTeam.add(player);
+		playerTeam.add(leftFollower);
+		playerTeam.add(rightFollower);
 		backgrounds.add(background1);
 		backgrounds.add(background2);
 		GLFW.glfwSetKeyCallback(Game.ui.getWindow(), pause);
@@ -222,12 +229,10 @@ public class MainGame extends Game implements Scene {
 		Vector2f direction = (targetLocation.subtract(playerLocation));
 		direction.normalize();
 		Vector2f location = new Vector2f(playerLocation);
-		location.x += player.getHitbox().width / 3f;
+		if (player.isLeader) location.x += player.getHitbox().width / 4f;
 		location.y += player.getHitbox().height / 3f;
-		location.x += direction.x * (player.getHitbox().width / 1.5f);
 		location.y += direction.y * (player.getHitbox().height / 1.5f);
-		float speed = 1.75f;
-		Bullet bullet = new Bullet(location, direction, speed, "res/Bullets/playerBullet.png");
+		Bullet bullet = new Bullet(location, direction, player.bulletSpeed, "res/Bullets/playerBullet.png");
 		bullet.setSize(15, 30);
 		bullets.add(bullet);
 		player.bulletTimer = 0;
@@ -242,7 +247,7 @@ public class MainGame extends Game implements Scene {
 
 	private void updateScore() {
 		scoreText = new Text(0, HEIGHT - 50, 30, 25, "Score: " + score);
-		pauseScoreText = new Text(HALF_WIDTH - 60, HALF_HEIGHT - 80, 40, 30, "Score: " + score);
+		pauseScoreText = new Text(HALF_WIDTH - 80, HALF_HEIGHT - 80, 40, 30, "Score: " + score);
 	}
 
 	/* ******************************************************************** */

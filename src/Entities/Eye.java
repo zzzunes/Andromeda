@@ -26,7 +26,7 @@ public class Eye extends Enemy {
 		super(destination, texture);
 		this.pos = position;
 		this.hitbox.setBounds((int) pos.x, (int) pos.y, 70, 70);
-		this.health = 600;
+		this.health = 1200;
 		this.speed = .04f;
 		this.destinationReached = false;
 		this.bulletTimer = 0;
@@ -48,18 +48,18 @@ public class Eye extends Enemy {
 	public void update(int delta) {
 		bulletTimer += delta;
 		patternTimer += delta;
-		if (health < 600) canFire = true;
+		if (health < 1200) canFire = true;
 		if (patternTimer >= patternMaxTime) {
 			switchPattern();
 		}
 		if (health <= 0) die();
-		else if (health < 150 && !awake) {
+		else if (health < 400 && !awake) {
 			texture = new Texture("res/Enemy/eyeopen.png");
 			increaseDifficulty();
 			moveBottomTop();
 			awake = true;
 		}
-		else if (health < 300 && !halfAwake) {
+		else if (health < 800 && !halfAwake) {
 			texture = new Texture("res/Enemy/eyehalf.png");
 			increaseDifficulty();
 			moveMiddle();
