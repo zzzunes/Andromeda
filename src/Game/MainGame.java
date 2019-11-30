@@ -25,6 +25,7 @@ public class MainGame extends Game implements Scene {
 	private static final int FOLLOWER_COST = 1000;
 	private static final int PURCHASE_WAIT_TIME = 500;
 	private static final int TEXT_FLASH_RATE = 500;
+	private static final float DEATH_PENALTY_PERCENT = .5f;
 	private Background background1;
 	private Background background2;
 	private Background pauseBackground;
@@ -37,7 +38,6 @@ public class MainGame extends Game implements Scene {
 	private Text gameOverText;
 	private Text welcomeText;
 	private Text pressEnterText;
-	private Text emptyText;
 	private Player player;
 	private Follower leftFollower;
 	private Follower rightFollower;
@@ -63,7 +63,7 @@ public class MainGame extends Game implements Scene {
 		background1 = new Background(0, 0, WIDTH, HEIGHT, "deepspace2.png");
 		background2 = new Background(0, -HEIGHT, WIDTH, HEIGHT, "deepspace2.png");
 		pauseBackground = new Background(0, 0, WIDTH, HEIGHT, "gray.png");
-		pauseText = new Text(HALF_WIDTH - 60, HALF_HEIGHT - 140, 40, 30, "PAUSED");
+		pauseText = new Text(HALF_WIDTH - 70, HALF_HEIGHT - 140, 40, 30, "PAUSED");
 		score = 0;
 		scoreText = new Text(0, HEIGHT - 50, 15, 10, "Score:" + score);
 		pauseScoreText = new Text(HALF_WIDTH - 60, HALF_HEIGHT - 80, 40, 30, "Score:" + score);
@@ -73,7 +73,6 @@ public class MainGame extends Game implements Scene {
 		gameOverText = new Text(HALF_WIDTH-100, HALF_HEIGHT-150, 40, 30, "GAME OVER");
 		welcomeText = new Text(HALF_WIDTH-100, HALF_HEIGHT-150, 40, 30, "ANDROMEDA");
 		pressEnterText = new Text(HALF_WIDTH-220, HALF_HEIGHT-100, 40, 30, "Press (Enter) to Begin");
-		emptyText = new Text(HALF_WIDTH-220, HALF_HEIGHT-100, 40, 30, "");
 		paused = false;
 		gameOver = false;
 		setupDeath = false;
@@ -161,6 +160,7 @@ public class MainGame extends Game implements Scene {
 			playerTeam.add(player);
 			music.start();
 			setupDeath = false;
+			score *= DEATH_PENALTY_PERCENT;
 		}
 		if (Game.ui.keyPressed(GLFW.GLFW_KEY_X)) {
 			gameOver = true;
