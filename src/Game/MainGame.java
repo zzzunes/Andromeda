@@ -2,10 +2,7 @@ package Game;
 
 import Entities.*;
 import Tools.Vector2f;
-import VFX.Background;
-import VFX.BackgroundMusic;
-import VFX.Effect;
-import VFX.EffectGenerator;
+import VFX.*;
 import edu.utc.game.*;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.glfw.GLFWKeyCallback;
@@ -26,6 +23,8 @@ public class MainGame extends Game implements Scene {
 	private static final int HALF_WIDTH = WIDTH / 2;
 	private static final int HALF_HEIGHT = HEIGHT / 2;
 	private static final int FOLLOWER_COST = 1000;
+	private static final int PURCHASE_WAIT_TIME = 500;
+	private static final int TEXT_FLASH_RATE = 500;
 	private Background background1;
 	private Background background2;
 	private Background pauseBackground;
@@ -36,6 +35,9 @@ public class MainGame extends Game implements Scene {
 	private Text continueYes;
 	private Text continueNo;
 	private Text gameOverText;
+	private Text welcomeText;
+	private Text pressEnterText;
+	private Text emptyText;
 	private Player player;
 	private Follower leftFollower;
 	private Follower rightFollower;
@@ -47,7 +49,10 @@ public class MainGame extends Game implements Scene {
 	private boolean paused;
 	private boolean gameOver;
 	private boolean setupDeath;
+	private boolean hasStartedGame;
 	private int score;
+	private int timeSincePurchased;
+	private int textFlashTimer;
 	public static List<Effect> effects;
 	public static List<Bullet> enemyBullets;
 
@@ -65,9 +70,14 @@ public class MainGame extends Game implements Scene {
 		deathText = new Text(HALF_WIDTH-80, HALF_HEIGHT - 200, 40, 30, "Continue?");
 		continueYes = new Text(HALF_WIDTH-160, HALF_HEIGHT - 150, 40, 30, "Yes (Z)");
 		continueNo = new Text(HALF_WIDTH+60, HALF_HEIGHT - 150, 40, 30, "No (X)");
+		gameOverText = new Text(HALF_WIDTH-100, HALF_HEIGHT-150, 40, 30, "GAME OVER");
+		welcomeText = new Text(HALF_WIDTH-100, HALF_HEIGHT-150, 40, 30, "ANDROMEDA");
+		pressEnterText = new Text(HALF_WIDTH-220, HALF_HEIGHT-100, 40, 30, "Press (Enter) to Begin");
+		emptyText = new Text(HALF_WIDTH-220, HALF_HEIGHT-100, 40, 30, "");
 		paused = false;
 		gameOver = false;
 		setupDeath = false;
+		hasStartedGame = false;
 		player = new Player(new Vector2f(WIDTH / 2f, HEIGHT / 2f));
 		leftFollower = new Follower(player, true, "res/teamShip.png");
 		rightFollower = new Follower(player, false, "res/teamShip.png");
@@ -82,8 +92,10 @@ public class MainGame extends Game implements Scene {
 		playerTeam.add(rightFollower);
 		backgrounds.add(background1);
 		backgrounds.add(background2);
+		timeSincePurchased = 0;
+		textFlashTimer = 0;
 		GLFW.glfwSetKeyCallback(Game.ui.getWindow(), pause);
-		music = new BackgroundMusic("cruelAngelThesis");
+		music = new BackgroundMusic("weightOfTheWorld");
 		music.start();
 		enemies.add(EnemyGenerator.generateEyeStar(new Vector2f(HALF_WIDTH - 35, -100), new Vector2f(HALF_WIDTH - 35, 100)));
 	}
@@ -91,7 +103,8 @@ public class MainGame extends Game implements Scene {
 	public Scene drawFrame(int delta) {
 		GL11.glClear(GL11.GL_COLOR_BUFFER_BIT | GL11.GL_DEPTH_BUFFER_BIT);
 
-		if (gameOver) gameOverScreen();
+		if (!hasStartedGame) mainMenuScreen(delta);
+		else if (gameOver) gameOverScreen();
 		else if (leaderIsDead()) deathScreen(delta);
 		else if (paused) pauseScreen();
 		else runGame(delta);
@@ -102,6 +115,22 @@ public class MainGame extends Game implements Scene {
 	/* ******************************************************************** */
 	/* ********************** Game Scene Options Begin ******************** */
 	/* ******************************************************************** */
+
+	private void mainMenuScreen(int delta) {
+		updateBackgrounds(backgrounds);
+		draw(backgrounds);
+		textFlashTimer += delta;
+		if (textFlashTimer > TEXT_FLASH_RATE && textFlashTimer < TEXT_FLASH_RATE * 2) {
+			pressEnterText.draw();
+		}
+		if (textFlashTimer > TEXT_FLASH_RATE * 2) {
+			textFlashTimer = 0;
+		}
+		welcomeText.draw();
+		if (Game.ui.keyPressed(GLFW.GLFW_KEY_ENTER)) {
+			hasStartedGame = true;
+		}
+	}
 
 	private void pauseScreen() {
 		draw();
@@ -131,6 +160,7 @@ public class MainGame extends Game implements Scene {
 			player.activate();
 			playerTeam.add(player);
 			music.start();
+			setupDeath = false;
 		}
 		if (Game.ui.keyPressed(GLFW.GLFW_KEY_X)) {
 			gameOver = true;
@@ -140,8 +170,8 @@ public class MainGame extends Game implements Scene {
 	private void gameOverScreen() {
 		pauseBackground.draw();
 		// gameOverMusic.play();
-		// gameOverText.draw();
-		// pauseScoreText.draw();
+		gameOverText.draw();
+		pauseScoreText.draw();
 	}
 
 	private void runGame(int delta) {
@@ -171,7 +201,7 @@ public class MainGame extends Game implements Scene {
 	}
 
 	private void updateGame(int delta) {
-		purchaseFollowers();
+		purchaseFollowers(delta);
 		update(playerTeam, delta);
 		update(bullets, delta);
 		update(enemyBullets, delta);
@@ -301,20 +331,23 @@ public class MainGame extends Game implements Scene {
 		player.bulletTimer = 0;
 	}
 
-	private void purchaseFollowers() {
+	private void purchaseFollowers(int delta) {
 		/* P is for Purchase */
+		timeSincePurchased += delta;
 		if (Game.ui.keyPressed(GLFW.GLFW_KEY_P)) {
-			if (!leftFollower.isActive() && score > FOLLOWER_COST) {
+			if (!leftFollower.isActive() && score > FOLLOWER_COST && timeSincePurchased > PURCHASE_WAIT_TIME) {
 				leftFollower.activate();
 				leftFollower.health = leftFollower.maxHealth;
 				playerTeam.add(leftFollower);
 				score -= FOLLOWER_COST;
+				timeSincePurchased = 0;
 			}
-			else if (!rightFollower.isActive() && score > FOLLOWER_COST) {
+			else if (!rightFollower.isActive() && score > FOLLOWER_COST && timeSincePurchased > PURCHASE_WAIT_TIME) {
 				rightFollower.activate();
 				rightFollower.health = rightFollower.maxHealth;
 				playerTeam.add(rightFollower);
 				score -= FOLLOWER_COST;
+				timeSincePurchased = 0;
 			}
 		}
 	}
