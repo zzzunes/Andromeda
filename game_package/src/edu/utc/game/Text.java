@@ -14,6 +14,8 @@ public class Text extends GameObject {
 	//Map the desired character to its index in the texture
 	private static Map<String, Integer> characterMap;
 
+	public int time;
+
 	//texture setup stuff
 	private static int id;
 	private static int imgWidth;
@@ -105,10 +107,8 @@ public class Text extends GameObject {
 		this.b = b;
 	}
 
-	//So you can do dynamic things with the text
-	public void update(int delta)
-	{
-
+	public void update(int delta) {
+		time += delta;
 	}
 
 	public void draw()

@@ -53,6 +53,7 @@ public class MainGame extends Game implements Scene {
 	private int score;
 	private int timeSincePurchased;
 	private int textFlashTimer;
+	private int introSongTimer;
 	public static List<Effect> effects;
 	public static List<Bullet> enemyBullets;
 
@@ -93,6 +94,7 @@ public class MainGame extends Game implements Scene {
 		backgrounds.add(background2);
 		timeSincePurchased = 0;
 		textFlashTimer = 0;
+		introSongTimer = 0;
 		GLFW.glfwSetKeyCallback(Game.ui.getWindow(), pause);
 		music = new BackgroundMusic("weightOfTheWorld");
 		music.start();
@@ -119,11 +121,17 @@ public class MainGame extends Game implements Scene {
 		updateBackgrounds(backgrounds);
 		draw(backgrounds);
 		textFlashTimer += delta;
+		introSongTimer += delta;
 		if (textFlashTimer > TEXT_FLASH_RATE && textFlashTimer < TEXT_FLASH_RATE * 2) {
 			pressEnterText.draw();
 		}
 		if (textFlashTimer > TEXT_FLASH_RATE * 2) {
 			textFlashTimer = 0;
+		}
+		if (introSongTimer > 9300) {
+			music.rewind();
+			music.start();
+			introSongTimer = 0;
 		}
 		welcomeText.draw();
 		if (Game.ui.keyPressed(GLFW.GLFW_KEY_ENTER)) {

@@ -26,4 +26,8 @@ public class BackgroundMusic {
 	public void pause() {
 		song.pause();
 	}
+
+	public void rewind() {
+		song.rewind();
+	}
 }
