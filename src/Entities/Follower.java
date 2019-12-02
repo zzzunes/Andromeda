@@ -18,7 +18,7 @@ public class Follower extends Player {
 		this.bulletRate = leader.bulletRate * 4;
 		this.health = leader.health;
 		this.isLeader = false;
-		this.bulletSpeed = player.bulletSpeed;
+		this.bulletSpeed = 1.25f;
 	}
 
 	@Override

@@ -26,6 +26,7 @@ public class MainGame extends Game implements Scene {
 	private static final int PURCHASE_WAIT_TIME = 500;
 	private static final int TEXT_FLASH_RATE = 500;
 	private static final float DEATH_PENALTY_PERCENT = .5f;
+	private static final int INVINCIBILITY_TIME = 2000;
 	private Background background1;
 	private Background background2;
 	private Background pauseBackground;
@@ -54,6 +55,7 @@ public class MainGame extends Game implements Scene {
 	private int timeSincePurchased;
 	private int textFlashTimer;
 	private int introSongTimer;
+	private int invincibilityTimer;
 	public static List<Effect> effects;
 	public static List<Bullet> enemyBullets;
 
@@ -95,6 +97,7 @@ public class MainGame extends Game implements Scene {
 		timeSincePurchased = 0;
 		textFlashTimer = 0;
 		introSongTimer = 0;
+		invincibilityTimer = INVINCIBILITY_TIME;
 		GLFW.glfwSetKeyCallback(Game.ui.getWindow(), pause);
 		music = new BackgroundMusic("weightOfTheWorld");
 		music.start();
@@ -169,6 +172,7 @@ public class MainGame extends Game implements Scene {
 			music.start();
 			setupDeath = false;
 			score *= DEATH_PENALTY_PERCENT;
+			invincibilityTimer = 0;
 		}
 		if (Game.ui.keyPressed(GLFW.GLFW_KEY_X)) {
 			gameOver = true;
@@ -209,6 +213,7 @@ public class MainGame extends Game implements Scene {
 	}
 
 	private void updateGame(int delta) {
+		invincibilityTimer += delta;
 		purchaseFollowers(delta);
 		update(playerTeam, delta);
 		update(bullets, delta);
@@ -221,7 +226,9 @@ public class MainGame extends Game implements Scene {
 
 	private void collideAndHit() {
 		detectHits(bullets, enemies);
-		detectPlayerDamage(playerTeam);
+		if (invincibilityTimer >= INVINCIBILITY_TIME) {
+			detectPlayerDamage(playerTeam);
+		}
 	}
 
 	private void deactivate() {
