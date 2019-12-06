@@ -19,7 +19,7 @@ public class MainGame extends Game implements Scene {
 
 	private static final int WIDTH = 600;
 	private static final int HEIGHT = 800;
-	private static final int SCROLL_SPEED = 10;
+	private static final float SCROLL_SPEED = 0.75f;
 	private static final int HALF_WIDTH = WIDTH / 2;
 	private static final int HALF_HEIGHT = HEIGHT / 2;
 	private static final int FOLLOWER_COST = 1000;
@@ -27,6 +27,7 @@ public class MainGame extends Game implements Scene {
 	private static final int TEXT_FLASH_RATE = 500;
 	private static final float DEATH_PENALTY_PERCENT = .5f;
 	private static final int INVINCIBILITY_TIME = 2000;
+	private static final int AFTER_DEATH_HANG_TIME = 2500;
 	private Background background1;
 	private Background background2;
 	private Background pauseBackground;
@@ -56,6 +57,8 @@ public class MainGame extends Game implements Scene {
 	private int textFlashTimer;
 	private int introSongTimer;
 	private int invincibilityTimer;
+	private int afterDeathTimer;
+	private boolean timeToDie;
 	public static List<Effect> effects;
 	public static List<Bullet> enemyBullets;
 
@@ -97,6 +100,8 @@ public class MainGame extends Game implements Scene {
 		timeSincePurchased = 0;
 		textFlashTimer = 0;
 		introSongTimer = 0;
+		afterDeathTimer = 0;
+		timeToDie = false;
 		invincibilityTimer = INVINCIBILITY_TIME;
 		GLFW.glfwSetKeyCallback(Game.ui.getWindow(), pause);
 		music = new BackgroundMusic("weightOfTheWorld");
@@ -109,7 +114,7 @@ public class MainGame extends Game implements Scene {
 
 		if (!hasStartedGame) mainMenuScreen(delta);
 		else if (gameOver) gameOverScreen();
-		else if (leaderIsDead()) deathScreen(delta);
+		else if (timeToDie) deathScreen(delta);
 		else if (paused) pauseScreen();
 		else runGame(delta);
 
@@ -121,7 +126,7 @@ public class MainGame extends Game implements Scene {
 	/* ******************************************************************** */
 
 	private void mainMenuScreen(int delta) {
-		updateBackgrounds(backgrounds);
+		updateBackgrounds(backgrounds, delta);
 		draw(backgrounds);
 		textFlashTimer += delta;
 		introSongTimer += delta;
@@ -173,6 +178,8 @@ public class MainGame extends Game implements Scene {
 			setupDeath = false;
 			score *= DEATH_PENALTY_PERCENT;
 			invincibilityTimer = 0;
+			afterDeathTimer = 0;
+			timeToDie = false;
 		}
 		if (Game.ui.keyPressed(GLFW.GLFW_KEY_X)) {
 			gameOver = true;
@@ -214,13 +221,17 @@ public class MainGame extends Game implements Scene {
 
 	private void updateGame(int delta) {
 		invincibilityTimer += delta;
+		if (leaderIsDead()) {
+			afterDeathTimer += delta;
+			timeToDie = afterDeathTimer >= AFTER_DEATH_HANG_TIME;
+		}
 		purchaseFollowers(delta);
 		update(playerTeam, delta);
 		update(bullets, delta);
 		update(enemyBullets, delta);
 		update(enemies, delta);
 		updateEffects(effects, delta);
-		updateBackgrounds(backgrounds);
+		updateBackgrounds(backgrounds, delta);
 		updateScore();
 	}
 
@@ -367,9 +378,9 @@ public class MainGame extends Game implements Scene {
 		}
 	}
 
-	private void updateBackgrounds(List<Background> backgrounds) {
+	private void updateBackgrounds(List<Background> backgrounds, int delta) {
 		for (Background background : backgrounds) {
-			background.getHitbox().y += SCROLL_SPEED;
+			background.getHitbox().y += SCROLL_SPEED * delta;
 			if (background.getHitbox().y >= HEIGHT) background.setHeight(-HEIGHT);
 		}
 	}

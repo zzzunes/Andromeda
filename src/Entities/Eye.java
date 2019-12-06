@@ -29,7 +29,7 @@ public class Eye extends Enemy {
 		this.health = 1200;
 		this.maxHealth = 1200;
 		this.healthBar = new EnemyHealthBar(100, this);
-		this.speed = .04f;
+		this.speed = .05f;
 		this.destinationReached = false;
 		this.bulletTimer = 0;
 		this.bulletDelay = delay;
