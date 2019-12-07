@@ -2,6 +2,7 @@ package Entities;
 
 import Game.MainGame;
 import Tools.Vector2f;
+import VFX.Color;
 import VFX.Effect;
 import VFX.EffectGenerator;
 import VFX.EnemyHealthBar;
@@ -22,20 +23,21 @@ public class TextEnemy extends Enemy {
 	private boolean canFire;
 	private String name;
 	private Pattern pattern;
+	private Color color;
 
-	public TextEnemy(Vector2f position, Vector2f destination, String name, int delay) {
+	public TextEnemy(Vector2f position, Vector2f destination, String name, int delay, Color color) {
 		this.destination = destination;
 		this.pos = position;
 		this.hitbox.setBounds((int) pos.x, (int) pos.y, 80 + (14 * name.length()), 35);
-		this.health = 300;
-		this.maxHealth = 300;
+		this.health = 175;
+		this.maxHealth = 175;
 		this.healthBar = new EnemyHealthBar(100, this);
-		this.speed = .07f;
+		this.speed = .065f;
 		this.destinationReached = false;
 		this.bulletTimer = 0;
 		this.bulletDelay = delay;
-		this.bulletSpeed = 1.1f;
-		this.bulletsPerFrame = 15;
+		this.bulletSpeed = .40f;
+		this.bulletsPerFrame = 20;
 		this.goingRight = true;
 		this.delayed = false;
 		this.patternTimer = 0;
@@ -46,6 +48,7 @@ public class TextEnemy extends Enemy {
 		this.points = name.length() * 1000;
 		this.pattern = Pattern.OCTO;
 		this.name = name;
+		this.color = color;
 	}
 
 	@Override
@@ -157,7 +160,7 @@ public class TextEnemy extends Enemy {
 			Vector2f position = new Vector2f(x + center.x, y + center.y);
 			Vector2f direction = (position.subtract(center));
 			direction.normalize();
-			Bullet bullet = new Bullet(position, direction, bulletSpeed);
+			Bullet bullet = new Bullet(position, direction, bulletSpeed, MainGame.enemyBulletTexture);
 			MainGame.enemyBullets.add(bullet);
 		}
 	}
@@ -170,7 +173,7 @@ public class TextEnemy extends Enemy {
 			Vector2f position = new Vector2f(x + center.x, y + center.y);
 			Vector2f direction = (position.subtract(center));
 			direction.normalize();
-			Bullet bullet = new Bullet(position, direction, bulletSpeed);
+			Bullet bullet = new Bullet(position, direction, bulletSpeed, MainGame.enemyBulletTexture);
 			MainGame.enemyBullets.add(bullet);
 		}
 	}
@@ -190,7 +193,7 @@ public class TextEnemy extends Enemy {
 		for (Vector2f position : positions) {
 			Vector2f direction = (position.subtract(center));
 			direction.normalize();
-			Bullet bullet = new Bullet(position, direction, bulletSpeed);
+			Bullet bullet = new Bullet(position, direction, bulletSpeed, MainGame.enemyBulletTexture);
 			MainGame.enemyBullets.add(bullet);
 		}
 	}
@@ -217,6 +220,8 @@ public class TextEnemy extends Enemy {
 	@Override
 	public void draw() {
 		healthBar.draw();
-		new Text((int) pos.x - 20, (int) pos.y - 15, 40, 30, name).draw();
+		Text text = new Text((int) pos.x - 20, (int) pos.y - 15, 40, 30, name);
+		text.setColor(color.r, color.g, color.b);
+		text.draw();
 	}
 }

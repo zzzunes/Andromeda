@@ -15,8 +15,8 @@ public class StaticEffect implements Effect {
 	private boolean soundPlayed;
 	private Sound sound;
 
-	public StaticEffect(String path, int duration, Rectangle location) {
-		this.texture = new Texture(path);
+	public StaticEffect(Texture texture, int duration, Rectangle location) {
+		this.texture = texture;
 		this.duration = duration;
 		this.location = location;
 		this.timeActive = 0;

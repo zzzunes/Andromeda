@@ -6,6 +6,7 @@ import java.util.Map;
 import static org.lwjgl.stb.STBImage.stbi_load;
 import static org.lwjgl.stb.STBImage.stbi_failure_reason;
 
+import Tools.Vector2f;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.system.MemoryStack;
 
@@ -105,6 +106,10 @@ public class Text extends GameObject {
 		this.r = r;
 		this.g = g;
 		this.b = b;
+	}
+
+	public void setPosition(Vector2f vec) {
+		this.hitbox.setLocation((int) vec.x, (int) vec.y);
 	}
 
 	public void update(int delta) {

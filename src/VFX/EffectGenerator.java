@@ -2,14 +2,46 @@ package VFX;
 
 import Entities.Bullet;
 import edu.utc.game.GameObject;
+import edu.utc.game.Texture;
 
 import java.awt.*;
 import java.util.ArrayList;
 
 public class EffectGenerator {
+	private static ArrayList<Texture> explosions = new ArrayList<>();
+	private static ArrayList<Texture> redFlashPlayer = new ArrayList<>();
+	private static ArrayList<Texture> redFlashFollower = new ArrayList<>();
+	private static Texture pow;
+
+	public static void initialize() {
+		explosions.add(new Texture("res/Explosion/one.png"));
+		explosions.add(new Texture("res/Explosion/two.png"));
+		explosions.add(new Texture("res/Explosion/three.png"));
+		explosions.add(new Texture("res/Explosion/four.png"));
+		explosions.add(new Texture("res/Explosion/five.png"));
+		explosions.add(new Texture("res/Explosion/six.png"));
+		explosions.add(new Texture("res/Explosion/seven.png"));
+		explosions.add(new Texture("res/Explosion/eight.png"));
+		explosions.add(new Texture("res/Explosion/nine.png"));
+		explosions.add(new Texture("res/Explosion/ten.png"));
+		redFlashPlayer.add(new Texture("res/damagedspaceship.png"));
+		redFlashPlayer.add(new Texture("res/spaceship.png"));
+		redFlashPlayer.add(new Texture("res/damagedspaceship.png"));
+		redFlashPlayer.add(new Texture("res/spaceship.png"));
+		redFlashPlayer.add(new Texture("res/damagedspaceship.png"));
+		redFlashPlayer.add(new Texture("res/spaceship.png"));
+		redFlashFollower.add(new Texture("res/damagedfollower.png"));
+		redFlashFollower.add(new Texture("res/teamShip.png"));
+		redFlashFollower.add(new Texture("res/damagedfollower.png"));
+		redFlashFollower.add(new Texture("res/teamShip.png"));
+		redFlashFollower.add(new Texture("res/damagedfollower.png"));
+		redFlashFollower.add(new Texture("res/teamShip.png"));
+		pow = new Texture("res/pow.png");
+	}
+
 	public static Effect generateHitExplosion(GameObject obj) {
 		return new StaticEffect(
-				"res/pow.png",
+				pow,
 				1000,
 				new Rectangle(obj.getHitbox().x
 						- (obj.getHitbox().width / 2),
@@ -18,39 +50,14 @@ public class EffectGenerator {
 	}
 
 	public static Effect generateDeathExplosion(GameObject object) {
-		ArrayList<String> explosionPics = new ArrayList<String>();
-		explosionPics.add("res/Explosion/one.png");
-		explosionPics.add("res/Explosion/two.png");
-		explosionPics.add("res/Explosion/three.png");
-		explosionPics.add("res/Explosion/four.png");
-		explosionPics.add("res/Explosion/five.png");
-		explosionPics.add("res/Explosion/six.png");
-		explosionPics.add("res/Explosion/seven.png");
-		explosionPics.add("res/Explosion/eight.png");
-		explosionPics.add("res/Explosion/nine.png");
-		explosionPics.add("res/Explosion/ten.png");
-		return new Animation(explosionPics, 100, object.getHitbox(), "res/Sounds/boom.wav");
+		return new Animation(explosions, 100, object.getHitbox(), "res/Sounds/boom.wav");
 	}
 
 	public static Effect generateRedFlashPlayer(GameObject object) {
-		ArrayList<String> hitPics = new ArrayList<String>();
-		hitPics.add("res/damagedspaceship.png");
-		hitPics.add("res/spaceship.png");
-		hitPics.add("res/damagedspaceship.png");
-		hitPics.add("res/spaceship.png");
-		hitPics.add("res/damagedspaceship.png");
-		hitPics.add("res/spaceship.png");
-		return new Animation(hitPics, 50, object);
+		return new Animation(redFlashPlayer, 50, object);
 	}
 
 	public static Effect generateRedFlashFollower(GameObject object) {
-		ArrayList<String> hitPics = new ArrayList<String>();
-		hitPics.add("res/damagedfollower.png");
-		hitPics.add("res/teamShip.png");
-		hitPics.add("res/damagedfollower.png");
-		hitPics.add("res/teamShip.png");
-		hitPics.add("res/damagedfollower.png");
-		hitPics.add("res/teamShip.png");
-		return new Animation(hitPics, 50, object);
+		return new Animation(redFlashFollower, 50, object);
 	}
 }

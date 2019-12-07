@@ -20,7 +20,7 @@ public class BackgroundMusic {
 
 	public void change(String soundPath) {
 		stop();
-		song = new Sound(soundPath);
+		song = new Sound("res/Music/" + soundPath + ".wav");
 	}
 
 	public void pause() {

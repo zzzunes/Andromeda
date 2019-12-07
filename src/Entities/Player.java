@@ -26,12 +26,12 @@ public class Player extends GameObject {
 	public Player(Vector2f position) {
 		this.pos = position;
 		this.hitbox.setBounds((int) pos.x, (int) pos.y, 32, 32);
-		this.speed = .3f;
+		this.speed = .35f;
 		this.direction = new Vector2f(0, 0);
 		this.texture = new Texture("res/spaceship.png");
 		this.healthBar = new HealthBar(100, this);
-		this.health = 150;
-		this.maxHealth = 150;
+		this.health = 125;
+		this.maxHealth = 125;
 		this.bulletTimer = 0;
 		this.bulletRate = 35;
 		this.bulletSpeed = 1.75f;

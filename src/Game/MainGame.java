@@ -17,18 +17,19 @@ public class MainGame extends Game implements Scene {
 		game.gameLoop();
 	}
 
-	private static final int WIDTH = 600;
-	private static final int HEIGHT = 800;
+	public static final int WIDTH = 600;
+	public static final int HEIGHT = 800;
+	public static final int HALF_WIDTH = WIDTH / 2;
+	public static final int HALF_HEIGHT = HEIGHT / 2;
 	private static final float SCROLL_SPEED = 0.75f;
-	private static final int HALF_WIDTH = WIDTH / 2;
-	private static final int HALF_HEIGHT = HEIGHT / 2;
 	private static final float FOLLOWER_COST = .2f;
 	private static final int PURCHASE_WAIT_TIME = 500;
 	private static final int TEXT_FLASH_RATE = 500;
 	private static final float DEATH_PENALTY_PERCENT = .5f;
 	private static final int INVINCIBILITY_TIME = 2000;
 	private static final int AFTER_DEATH_HANG_TIME = 2500;
-	private static final int ENEMY_DISPATCH_TIME = 11000;
+	private static final int ENEMY_DISPATCH_TIME = 7000;
+	private static final int FINAL_BOSS_WAIT_TIME = 5000;
 	private Background background1;
 	private Background background2;
 	private Background pauseBackground;
@@ -61,7 +62,11 @@ public class MainGame extends Game implements Scene {
 	private int invincibilityTimer;
 	private int afterDeathTimer;
 	private int enemyDispatchTimer;
+	private int finalBossUnleashTimer;
 	private boolean timeToDie;
+	private boolean finalBossSpawned;
+	public static Texture enemyBulletTexture;
+	public static Texture playerBulletTexture;
 	public static List<Effect> effects;
 	public static List<Bullet> enemyBullets;
 
@@ -105,13 +110,17 @@ public class MainGame extends Game implements Scene {
 		textFlashTimer = 0;
 		introSongTimer = 0;
 		afterDeathTimer = 0;
+		finalBossUnleashTimer = 0;
 		enemyDispatchTimer = ENEMY_DISPATCH_TIME;
 		timeToDie = false;
+		finalBossSpawned = false;
 		invincibilityTimer = INVINCIBILITY_TIME;
+		enemyBulletTexture = new Texture("res/Bullets/roundBullet.png");
+		playerBulletTexture = new Texture("res/Bullets/playerBullet.png");
 		GLFW.glfwSetKeyCallback(Game.ui.getWindow(), pause);
 		music = new BackgroundMusic("weightOfTheWorld");
+		EffectGenerator.initialize();
 		music.start();
-		//enemies.add(EnemyGenerator.generateEyeStar(new Vector2f(HALF_WIDTH - 35, -100), new Vector2f(HALF_WIDTH - 35, 100)));
 	}
 
 	public Scene drawFrame(int delta) {
@@ -210,6 +219,20 @@ public class MainGame extends Game implements Scene {
 	/* ********************** Game Scene Options End ********************** */
 	/* ******************************************************************** */
 
+	private void spawnFinalBoss(int delta) {
+		music.stop();
+		finalBossUnleashTimer += delta;
+		if (finalBossUnleashTimer >= FINAL_BOSS_WAIT_TIME) {
+			backgrounds.clear();
+			backgrounds.add(new Background(0, 0, WIDTH, HEIGHT, "Zone-202-big.png"));
+			backgrounds.add(new Background(0, -HEIGHT, WIDTH, HEIGHT, "Zone-202-big.png"));
+			music.change("cruelAngelThesis");
+			music.start();
+			enemies.add(EnemyGenerator.generateEyeStar(new Vector2f(HALF_WIDTH - 35, -100), new Vector2f(HALF_WIDTH - 35, 100)));
+			finalBossSpawned = true;
+		}
+	}
+
 	private void firePlayerBullets() {
 		for (Player player : playerTeam) {
 			if (Game.ui.keyPressed(GLFW.GLFW_KEY_SPACE) && player.bulletTimer >= player.bulletRate) {
@@ -229,6 +252,9 @@ public class MainGame extends Game implements Scene {
 		if (leaderIsDead()) {
 			afterDeathTimer += delta;
 			timeToDie = afterDeathTimer >= AFTER_DEATH_HANG_TIME;
+		}
+		if (classNames.isEmpty() && enemies.isEmpty() && !finalBossSpawned) {
+			spawnFinalBoss(delta);
 		}
 		spawnEnemies(delta);
 		purchaseFollowers(delta);
@@ -323,6 +349,7 @@ public class MainGame extends Game implements Scene {
 
 	private void detectHitsPlayer(List<Bullet> bullets, Player player) {
 		for (Bullet bullet : bullets) {
+			if (Math.abs(bullet.getHitbox().x-player.getHitbox().x) > 20) continue;
 			if (bullet.getHitbox().intersects(player.getHitbox())) {
 				bullet.deactivate();
 				player.takeHit();
@@ -363,7 +390,7 @@ public class MainGame extends Game implements Scene {
 		if (player.isLeader) location.x += player.getHitbox().width / 4f;
 		location.y += player.getHitbox().height / 3f;
 		location.y += direction.y * (player.getHitbox().height / 1.5f);
-		Bullet bullet = new Bullet(location, direction, player.bulletSpeed, "res/Bullets/playerBullet.png");
+		Bullet bullet = new Bullet(location, direction, player.bulletSpeed, playerBulletTexture);
 		bullet.setSize(15, 30);
 		bullets.add(bullet);
 		player.bulletTimer = 0;
@@ -392,8 +419,8 @@ public class MainGame extends Game implements Scene {
 
 	private void spawnEnemies(int delta) {
 		enemyDispatchTimer += delta;
-		if (enemyDispatchTimer > ENEMY_DISPATCH_TIME * enemies.size()) {
-			Enemy newEnemy = EnemyGenerator.generateClassEnemy(new Vector2f(0, 0), new Vector2f(HALF_WIDTH, HALF_HEIGHT), classNames);
+		if (!classNames.isEmpty() && enemyDispatchTimer > ENEMY_DISPATCH_TIME * enemies.size()) {
+			Enemy newEnemy = EnemyGenerator.generateClassEnemy(new Vector2f(HALF_WIDTH, HALF_HEIGHT), classNames);
 			enemies.add(newEnemy);
 			enemyDispatchTimer = 0;
 		}

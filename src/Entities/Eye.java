@@ -6,6 +6,7 @@ import VFX.Effect;
 import VFX.EffectGenerator;
 import VFX.EnemyHealthBar;
 import edu.utc.game.Texture;
+import sun.applet.Main;
 
 import java.util.ArrayList;
 
@@ -29,13 +30,13 @@ public class Eye extends Enemy {
 		this.health = 1200;
 		this.maxHealth = 1200;
 		this.healthBar = new EnemyHealthBar(100, this);
-		this.speed = .065f;
+		this.speed = .060f;
 		this.destinationReached = false;
 		this.bulletTimer = 0;
 		this.bulletDelay = delay;
-		this.bulletSpeed = .9f;
+		this.bulletSpeed = .6f;
 		this.pattern = pattern;
-		this.bulletsPerFrame = 15;
+		this.bulletsPerFrame = 20;
 		this.goingRight = true;
 		this.delayed = false;
 		this.patternTimer = 0;
@@ -131,10 +132,11 @@ public class Eye extends Enemy {
 	}
 
 	private void increaseDifficulty() {
-		speed *= 1.5f;
+		speed *= 1.1f;
 		bulletDelay *= 1.1f;
 		patternMaxTime /= 1.5f;
-		bulletSpeed *= 1.1f;
+		bulletSpeed *= 1.5f;
+		bulletsPerFrame *= 2f;
 	}
 
 	private void moveMiddle() {
@@ -157,7 +159,7 @@ public class Eye extends Enemy {
 			Vector2f position = new Vector2f(x + center.x, y + center.y);
 			Vector2f direction = (position.subtract(center));
 			direction.normalize();
-			Bullet bullet = new Bullet(position, direction, bulletSpeed);
+			Bullet bullet = new Bullet(position, direction, bulletSpeed, MainGame.enemyBulletTexture);
 			MainGame.enemyBullets.add(bullet);
 		}
 	}
@@ -170,7 +172,7 @@ public class Eye extends Enemy {
 			Vector2f position = new Vector2f(x + center.x, y + center.y);
 			Vector2f direction = (position.subtract(center));
 			direction.normalize();
-			Bullet bullet = new Bullet(position, direction, bulletSpeed);
+			Bullet bullet = new Bullet(position, direction, bulletSpeed, MainGame.enemyBulletTexture);
 			MainGame.enemyBullets.add(bullet);
 		}
 	}
@@ -190,7 +192,7 @@ public class Eye extends Enemy {
 		for (Vector2f position : positions) {
 			Vector2f direction = (position.subtract(center));
 			direction.normalize();
-			Bullet bullet = new Bullet(position, direction, bulletSpeed);
+			Bullet bullet = new Bullet(position, direction, bulletSpeed, MainGame.enemyBulletTexture);
 			MainGame.enemyBullets.add(bullet);
 		}
 	}

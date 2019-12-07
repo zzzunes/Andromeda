@@ -1,6 +1,9 @@
 package Entities;
 
+import Game.MainGame;
 import Tools.Vector2f;
+import VFX.Color;
+import sun.applet.Main;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -13,11 +16,13 @@ public class EnemyGenerator {
 		return new Eye(position, destination, "res/Enemy/eyeclosed.png", Enemy.Pattern.STAR, 2000);
 	}
 
-	public static Enemy generateClassEnemy(Vector2f position, Vector2f destination, List<String> classNames) {
+	public static Enemy generateClassEnemy(Vector2f destination, List<String> classNames) {
 		int namePosition = r.nextInt(classNames.size());
 		String name = classNames.get(namePosition);
 		classNames.remove(namePosition);
-		return new TextEnemy(position, destination, name, 2000);
+		Color color = new Color(r.nextFloat(), r.nextFloat(), r.nextFloat());
+		if (Math.max(color.b, Math.max(color.r, color.g)) < 0.2) color.r = 0.5f;
+		return new TextEnemy(generateEnemyOrigin(), destination, name, 2000, color);
 	}
 
 	public static List<String> generateEnemyList() {
@@ -46,5 +51,21 @@ public class EnemyGenerator {
 		theClass.add("Bowen Wexler");
 		theClass.add("Jackson Whitfield");
 		return theClass;
+	}
+
+	private static Vector2f generateEnemyOrigin() {
+		List<Vector2f> origins = new ArrayList<>();
+		origins.add(new Vector2f(-50,-50));
+		origins.add(new Vector2f(MainGame.HALF_WIDTH - 100, MainGame.HEIGHT + 200));
+		origins.add(new Vector2f(MainGame.WIDTH + 200,-100));
+		origins.add(new Vector2f(MainGame.WIDTH + 200,0));
+		origins.add(new Vector2f(MainGame.HALF_WIDTH, -200));
+		origins.add(new Vector2f(MainGame.WIDTH + 300,MainGame.HALF_HEIGHT));
+		origins.add(new Vector2f(-200, MainGame.HALF_HEIGHT));
+		origins.add(new Vector2f(-200,MainGame.HALF_HEIGHT - 100));
+		origins.add(new Vector2f(MainGame.HALF_WIDTH + MainGame.HALF_WIDTH / 2f,-100));
+		origins.add(new Vector2f(MainGame.WIDTH,-150));
+		int pos = r.nextInt(origins.size());
+		return origins.get(pos);
 	}
 }

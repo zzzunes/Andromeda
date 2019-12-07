@@ -16,13 +16,13 @@ public class Animation implements Effect {
 	private boolean active;
 	private boolean animated;
 	private int currentAnimation;
-	private ArrayList<String> paths;
+	private ArrayList<Texture> paths;
 	private Sound sound;
 	private boolean soundPlayed;
 
-	public Animation(ArrayList<String> paths, int duration, GameObject parent) {
-		this.texture = new Texture(paths.get(0));
-		this.paths = paths;
+	public Animation(ArrayList<Texture> textures, int duration, GameObject parent) {
+		this.texture = textures.get(0);
+		this.paths = textures;
 		this.duration = duration;
 		this.location = parent.getHitbox();
 		this.parent = parent;
@@ -32,9 +32,9 @@ public class Animation implements Effect {
 		this.currentAnimation = 0;
 	}
 
-	public Animation(ArrayList<String> paths, int duration, Rectangle location, String soundPath) {
-		this.texture = new Texture(paths.get(0));
-		this.paths = paths;
+	public Animation(ArrayList<Texture> textures, int duration, Rectangle location, String soundPath) {
+		this.texture = textures.get(0);
+		this.paths = textures;
 		this.duration = duration;
 		this.location = location;
 		this.timeActive = 0;
@@ -60,7 +60,7 @@ public class Animation implements Effect {
 					active = false;
 					return;
 				}
-				this.texture = new Texture(paths.get(currentAnimation));
+				this.texture = paths.get(currentAnimation);
 			}
 		}
 		else {
