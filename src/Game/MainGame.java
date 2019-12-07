@@ -74,6 +74,7 @@ public class MainGame extends Game implements Scene {
 		initUI(WIDTH, HEIGHT,"アンドロメダ");
 		Game.ui.enableMouseCursor(false);
 		GL11.glClearColor(0f, 0f, 0f, 0f);
+		EffectGenerator.initialize();
 		background1 = new Background(0, 0, WIDTH, HEIGHT, "deepspace2.png");
 		background2 = new Background(0, -HEIGHT, WIDTH, HEIGHT, "deepspace2.png");
 		pauseBackground = new Background(0, 0, WIDTH, HEIGHT, "gray.png");
@@ -119,7 +120,6 @@ public class MainGame extends Game implements Scene {
 		playerBulletTexture = new Texture("res/Bullets/playerBullet.png");
 		GLFW.glfwSetKeyCallback(Game.ui.getWindow(), pause);
 		music = new BackgroundMusic("weightOfTheWorld");
-		EffectGenerator.initialize();
 		music.start();
 	}
 

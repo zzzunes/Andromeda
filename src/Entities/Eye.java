@@ -6,7 +6,6 @@ import VFX.Effect;
 import VFX.EffectGenerator;
 import VFX.EnemyHealthBar;
 import edu.utc.game.Texture;
-import sun.applet.Main;
 
 import java.util.ArrayList;
 
@@ -30,17 +29,17 @@ public class Eye extends Enemy {
 		this.health = 1200;
 		this.maxHealth = 1200;
 		this.healthBar = new EnemyHealthBar(100, this);
-		this.speed = .060f;
+		this.speed = .07f;
 		this.destinationReached = false;
 		this.bulletTimer = 0;
 		this.bulletDelay = delay;
-		this.bulletSpeed = .6f;
+		this.bulletSpeed = .45f;
 		this.pattern = pattern;
-		this.bulletsPerFrame = 20;
+		this.bulletsPerFrame = 40;
 		this.goingRight = true;
 		this.delayed = false;
 		this.patternTimer = 0;
-		this.patternMaxTime = 4000;
+		this.patternMaxTime = 6000;
 		this.halfAwake = false;
 		this.awake = false;
 		this.canFire = false;
@@ -135,7 +134,6 @@ public class Eye extends Enemy {
 		speed *= 1.1f;
 		bulletDelay *= 1.1f;
 		patternMaxTime /= 1.5f;
-		bulletSpeed *= 1.5f;
 		bulletsPerFrame *= 2f;
 	}
 

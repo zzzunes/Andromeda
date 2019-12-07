@@ -23,8 +23,8 @@ public class Text extends GameObject {
 	private static int imgHeight;
 
 	//X and Y origin of the text box (top-left)
-	protected int x;
-	protected int y;
+	public int x;
+	public int y;
 
 	//Width and Height of each character box
 	protected int w;

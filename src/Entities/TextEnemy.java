@@ -20,10 +20,10 @@ public class TextEnemy extends Enemy {
 	private int patternMaxTime;
 	private boolean halfAwake;
 	private boolean awake;
-	private boolean canFire;
 	private String name;
 	private Pattern pattern;
 	private Color color;
+	private Text text;
 
 	public TextEnemy(Vector2f position, Vector2f destination, String name, int delay, Color color) {
 		this.destination = destination;
@@ -44,11 +44,12 @@ public class TextEnemy extends Enemy {
 		this.patternMaxTime = 3000;
 		this.halfAwake = false;
 		this.awake = false;
-		this.canFire = false;
 		this.points = name.length() * 1000;
 		this.pattern = Pattern.OCTO;
 		this.name = name;
 		this.color = color;
+		this.text = new Text((int) pos.x - 20, (int) pos.y - 15, 40, 30, name);
+		this.text.setColor(color.r, color.g, color.b);
 	}
 
 	@Override
@@ -56,7 +57,6 @@ public class TextEnemy extends Enemy {
 		bulletTimer += delta;
 		patternTimer += delta;
 		healthBar.update(delta);
-		if (health < maxHealth) canFire = true;
 		if (patternTimer >= patternMaxTime) {
 			switchPattern();
 		}
@@ -85,7 +85,7 @@ public class TextEnemy extends Enemy {
 			bulletTimer = 0;
 		}
 		if (bulletTimer < bulletDelay && !delayed) {
-			if (canFire) fire();
+			fire();
 		}
 
 		adjustHitBox();
@@ -206,6 +206,8 @@ public class TextEnemy extends Enemy {
 	}
 
 	private void adjustHitBox() {
+		text.x = (int) pos.x - 20;
+		text.y = (int) pos.y - 10;
 		hitbox.x = (int) pos.x;
 		hitbox.y = (int) pos.y;
 	}
@@ -220,8 +222,6 @@ public class TextEnemy extends Enemy {
 	@Override
 	public void draw() {
 		healthBar.draw();
-		Text text = new Text((int) pos.x - 20, (int) pos.y - 15, 40, 30, name);
-		text.setColor(color.r, color.g, color.b);
 		text.draw();
 	}
 }
