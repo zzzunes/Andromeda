@@ -59,16 +59,16 @@ public class Player extends GameObject {
 	}
 
 	private void getMovementInput() {
-		if (Game.ui.keyPressed(GLFW.GLFW_KEY_A)) {
+		if (Game.ui.keyPressed(GLFW.GLFW_KEY_A) || Game.ui.keyPressed(GLFW.GLFW_KEY_LEFT)) {
 			direction.x = -1;
 		}
-		if (Game.ui.keyPressed(GLFW.GLFW_KEY_D)) {
+		if (Game.ui.keyPressed(GLFW.GLFW_KEY_D) || Game.ui.keyPressed(GLFW.GLFW_KEY_RIGHT)) {
 			direction.x = 1;
 		}
-		if (Game.ui.keyPressed(GLFW.GLFW_KEY_W)) {
+		if (Game.ui.keyPressed(GLFW.GLFW_KEY_W) || Game.ui.keyPressed(GLFW.GLFW_KEY_UP)) {
 			direction.y = -1;
 		}
-		if (Game.ui.keyPressed(GLFW.GLFW_KEY_S)) {
+		if (Game.ui.keyPressed(GLFW.GLFW_KEY_S) || Game.ui.keyPressed(GLFW.GLFW_KEY_DOWN)) {
 			direction.y = 1;
 		}
 	}

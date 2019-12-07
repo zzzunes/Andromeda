@@ -21,7 +21,7 @@ public class MainGame extends Game implements Scene {
 	public static final int HEIGHT = 800;
 	public static final int HALF_WIDTH = WIDTH / 2;
 	public static final int HALF_HEIGHT = HEIGHT / 2;
-	private static final float SCROLL_SPEED = .9f;
+	private static final float SCROLL_SPEED = .95f;
 	private static final float FOLLOWER_COST = .9f;
 	private static final int PURCHASE_WAIT_TIME = 500;
 	private static final int TEXT_FLASH_RATE = 500;
@@ -32,6 +32,7 @@ public class MainGame extends Game implements Scene {
 	private static final int FINAL_BOSS_WAIT_TIME = 5000;
 	private Background background1;
 	private Background background2;
+	private Background background3;
 	private Background pauseBackground;
 	private Text pauseText;
 	private Text scoreText;
@@ -77,6 +78,7 @@ public class MainGame extends Game implements Scene {
 		EffectGenerator.initialize();
 		background1 = new Background(0, 0, WIDTH, HEIGHT, "deepspace2.png");
 		background2 = new Background(0, -HEIGHT, WIDTH, HEIGHT, "deepspace2.png");
+		background3 = new Background(0, -HEIGHT*2, WIDTH, HEIGHT, "deepspace2.png");
 		pauseBackground = new Background(0, 0, WIDTH, HEIGHT, "gray.png");
 		pauseText = new Text(HALF_WIDTH - 70, HALF_HEIGHT - 140, 40, 30, "PAUSED");
 		score = 0;
@@ -101,12 +103,13 @@ public class MainGame extends Game implements Scene {
 		effects = new ArrayList<>();
 		backgrounds = new ArrayList<>();
 		playerTeam = new ArrayList<>();
-		classNames = EnemyGenerator.generateEnemyList();
+		classNames = new ArrayList<>();//EnemyGenerator.generateEnemyList();
 		playerTeam.add(player);
 		playerTeam.add(leftFollower);
 		playerTeam.add(rightFollower);
 		backgrounds.add(background1);
 		backgrounds.add(background2);
+		backgrounds.add(background3);
 		timeSincePurchased = 0;
 		textFlashTimer = 0;
 		introSongTimer = 0;
@@ -170,7 +173,6 @@ public class MainGame extends Game implements Scene {
 
 	private void deathScreen(int delta) {
 		if (!setupDeath) {
-			music.pause();
 			bullets.clear();
 			setupDeath = true;
 		}
@@ -188,7 +190,6 @@ public class MainGame extends Game implements Scene {
 			player.health = player.maxHealth;
 			player.activate();
 			playerTeam.add(player);
-			music.start();
 			setupDeath = false;
 			score *= DEATH_PENALTY_PERCENT;
 			invincibilityTimer = 0;
@@ -226,9 +227,12 @@ public class MainGame extends Game implements Scene {
 			backgrounds.clear();
 			backgrounds.add(new Background(0, 0, WIDTH, HEIGHT, "Zone-202-big.png"));
 			backgrounds.add(new Background(0, -HEIGHT, WIDTH, HEIGHT, "Zone-202-big.png"));
-			music.change("cruelAngelThesis");
+			backgrounds.add(new Background(0, -HEIGHT*2, WIDTH, HEIGHT, "Zone-202-big.png"));
+			backgrounds.add(new Background(0, -HEIGHT*3, WIDTH, HEIGHT, "Zone-202-big.png"));
+			music.change("kommSusserTod");
 			music.start();
-			enemies.add(EnemyGenerator.generateEyeStar(new Vector2f(HALF_WIDTH - 35, -100), new Vector2f(HALF_WIDTH - 35, 100)));
+			enemies.add(EnemyGenerator.generateEyeStar(new Vector2f(HALF_WIDTH - 150, -100), new Vector2f(HALF_WIDTH + 75, 100)));
+			enemies.add(EnemyGenerator.generateEyeStar(new Vector2f(HALF_WIDTH + 75, -100), new Vector2f(HALF_WIDTH - 150, 100)));
 			finalBossSpawned = true;
 		}
 	}
