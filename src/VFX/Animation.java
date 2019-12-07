@@ -32,7 +32,7 @@ public class Animation implements Effect {
 		this.currentAnimation = 0;
 	}
 
-	public Animation(ArrayList<Texture> textures, int duration, Rectangle location, String soundPath) {
+	public Animation(ArrayList<Texture> textures, int duration, Rectangle location, Sound sound) {
 		this.texture = textures.get(0);
 		this.paths = textures;
 		this.duration = duration;
@@ -41,7 +41,7 @@ public class Animation implements Effect {
 		this.active = true;
 		this.animated = true;
 		this.currentAnimation = 0;
-		this.sound = new Sound(soundPath);
+		this.sound = sound;
 		this.soundPlayed = false;
 	}
 

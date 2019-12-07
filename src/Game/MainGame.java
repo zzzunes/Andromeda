@@ -21,8 +21,8 @@ public class MainGame extends Game implements Scene {
 	public static final int HEIGHT = 800;
 	public static final int HALF_WIDTH = WIDTH / 2;
 	public static final int HALF_HEIGHT = HEIGHT / 2;
-	private static final float SCROLL_SPEED = 0.75f;
-	private static final float FOLLOWER_COST = .2f;
+	private static final float SCROLL_SPEED = .9f;
+	private static final float FOLLOWER_COST = .9f;
 	private static final int PURCHASE_WAIT_TIME = 500;
 	private static final int TEXT_FLASH_RATE = 500;
 	private static final float DEATH_PENALTY_PERCENT = .5f;

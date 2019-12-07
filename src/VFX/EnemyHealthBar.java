@@ -15,7 +15,7 @@ public class EnemyHealthBar extends HealthBar {
 	public void update(int delta) {
 		percent = (int) ((parent.health / parent.maxHealth) * 100);
 		this.hitbox.setBounds(parent.getHitbox().x,
-				parent.getHitbox().y - (int) parent.getHitbox().getHeight(),
+				parent.getHitbox().y - 20,
 				60,
 				20);
 		this.healthBar = getHealthBar(percent);

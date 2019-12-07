@@ -2,10 +2,7 @@ package Entities;
 
 import Game.MainGame;
 import Tools.Vector2f;
-import VFX.Color;
-import VFX.Effect;
-import VFX.EffectGenerator;
-import VFX.EnemyHealthBar;
+import VFX.*;
 import edu.utc.game.Text;
 
 import java.util.ArrayList;
@@ -20,9 +17,7 @@ public class TextEnemy extends Enemy {
 	private int patternMaxTime;
 	private boolean halfAwake;
 	private boolean awake;
-	private String name;
 	private Pattern pattern;
-	private Color color;
 	private Text text;
 
 	public TextEnemy(Vector2f position, Vector2f destination, String name, int delay, Color color) {
@@ -31,7 +26,7 @@ public class TextEnemy extends Enemy {
 		this.hitbox.setBounds((int) pos.x, (int) pos.y, 80 + (14 * name.length()), 35);
 		this.health = 175;
 		this.maxHealth = 175;
-		this.healthBar = new EnemyHealthBar(100, this);
+		this.healthBar = new TextEnemyHealthBar(100, this);
 		this.speed = .065f;
 		this.destinationReached = false;
 		this.bulletTimer = 0;
@@ -46,8 +41,6 @@ public class TextEnemy extends Enemy {
 		this.awake = false;
 		this.points = name.length() * 1000;
 		this.pattern = Pattern.OCTO;
-		this.name = name;
-		this.color = color;
 		this.text = new Text((int) pos.x - 20, (int) pos.y - 15, 40, 30, name);
 		this.text.setColor(color.r, color.g, color.b);
 	}

@@ -2,6 +2,7 @@ package VFX;
 
 import Entities.Bullet;
 import edu.utc.game.GameObject;
+import edu.utc.game.Sound;
 import edu.utc.game.Texture;
 
 import java.awt.*;
@@ -13,6 +14,7 @@ public class EffectGenerator {
 	private static ArrayList<Texture> redFlashFollower = new ArrayList<>();
 	private static ArrayList<Texture> healthBar = new ArrayList<>();
 	private static Texture pow;
+	private static Sound deathSound;
 
 	public static void initialize() {
 		explosions.add(new Texture("res/Explosion/one.png"));
@@ -49,6 +51,7 @@ public class EffectGenerator {
 		healthBar.add(new Texture("res/HealthBar/health9.png"));
 		healthBar.add(new Texture("res/HealthBar/health10.png"));
 		pow = new Texture("res/pow.png");
+		deathSound = new Sound("res/Sounds/boom.wav");
 	}
 
 	public static Effect generateHitExplosion(GameObject obj) {
@@ -62,7 +65,7 @@ public class EffectGenerator {
 	}
 
 	public static Effect generateDeathExplosion(GameObject object) {
-		return new Animation(explosions, 100, object.getHitbox(), "res/Sounds/boom.wav");
+		return new Animation(explosions, 100, object.getHitbox(), deathSound);
 	}
 
 	public static Effect generateRedFlashPlayer(GameObject object) {
