@@ -31,4 +31,26 @@ public class EffectGenerator {
 		explosionPics.add("res/Explosion/ten.png");
 		return new Animation(explosionPics, 100, object.getHitbox(), "res/Sounds/boom.wav");
 	}
+
+	public static Effect generateRedFlashPlayer(GameObject object) {
+		ArrayList<String> hitPics = new ArrayList<String>();
+		hitPics.add("res/damagedspaceship.png");
+		hitPics.add("res/spaceship.png");
+		hitPics.add("res/damagedspaceship.png");
+		hitPics.add("res/spaceship.png");
+		hitPics.add("res/damagedspaceship.png");
+		hitPics.add("res/spaceship.png");
+		return new Animation(hitPics, 50, object);
+	}
+
+	public static Effect generateRedFlashFollower(GameObject object) {
+		ArrayList<String> hitPics = new ArrayList<String>();
+		hitPics.add("res/damagedfollower.png");
+		hitPics.add("res/teamShip.png");
+		hitPics.add("res/damagedfollower.png");
+		hitPics.add("res/teamShip.png");
+		hitPics.add("res/damagedfollower.png");
+		hitPics.add("res/teamShip.png");
+		return new Animation(hitPics, 50, object);
+	}
 }

@@ -22,12 +22,13 @@ public class MainGame extends Game implements Scene {
 	private static final float SCROLL_SPEED = 0.75f;
 	private static final int HALF_WIDTH = WIDTH / 2;
 	private static final int HALF_HEIGHT = HEIGHT / 2;
-	private static final int FOLLOWER_COST = 1000;
+	private static final float FOLLOWER_COST = .2f;
 	private static final int PURCHASE_WAIT_TIME = 500;
 	private static final int TEXT_FLASH_RATE = 500;
 	private static final float DEATH_PENALTY_PERCENT = .5f;
 	private static final int INVINCIBILITY_TIME = 2000;
 	private static final int AFTER_DEATH_HANG_TIME = 2500;
+	private static final int ENEMY_DISPATCH_TIME = 11000;
 	private Background background1;
 	private Background background2;
 	private Background pauseBackground;
@@ -47,6 +48,7 @@ public class MainGame extends Game implements Scene {
 	private List<Enemy> enemies;
 	private List<Player> playerTeam;
 	private List<Background> backgrounds;
+	private List<String> classNames;
 	private BackgroundMusic music;
 	private boolean paused;
 	private boolean gameOver;
@@ -58,6 +60,7 @@ public class MainGame extends Game implements Scene {
 	private int introSongTimer;
 	private int invincibilityTimer;
 	private int afterDeathTimer;
+	private int enemyDispatchTimer;
 	private boolean timeToDie;
 	public static List<Effect> effects;
 	public static List<Bullet> enemyBullets;
@@ -92,6 +95,7 @@ public class MainGame extends Game implements Scene {
 		effects = new ArrayList<>();
 		backgrounds = new ArrayList<>();
 		playerTeam = new ArrayList<>();
+		classNames = EnemyGenerator.generateEnemyList();
 		playerTeam.add(player);
 		playerTeam.add(leftFollower);
 		playerTeam.add(rightFollower);
@@ -101,12 +105,13 @@ public class MainGame extends Game implements Scene {
 		textFlashTimer = 0;
 		introSongTimer = 0;
 		afterDeathTimer = 0;
+		enemyDispatchTimer = ENEMY_DISPATCH_TIME;
 		timeToDie = false;
 		invincibilityTimer = INVINCIBILITY_TIME;
 		GLFW.glfwSetKeyCallback(Game.ui.getWindow(), pause);
 		music = new BackgroundMusic("weightOfTheWorld");
 		music.start();
-		enemies.add(EnemyGenerator.generateEyeStar(new Vector2f(HALF_WIDTH - 35, -100), new Vector2f(HALF_WIDTH - 35, 100)));
+		//enemies.add(EnemyGenerator.generateEyeStar(new Vector2f(HALF_WIDTH - 35, -100), new Vector2f(HALF_WIDTH - 35, 100)));
 	}
 
 	public Scene drawFrame(int delta) {
@@ -225,6 +230,7 @@ public class MainGame extends Game implements Scene {
 			afterDeathTimer += delta;
 			timeToDie = afterDeathTimer >= AFTER_DEATH_HANG_TIME;
 		}
+		spawnEnemies(delta);
 		purchaseFollowers(delta);
 		update(playerTeam, delta);
 		update(bullets, delta);
@@ -321,6 +327,12 @@ public class MainGame extends Game implements Scene {
 				bullet.deactivate();
 				player.takeHit();
 				effects.add(EffectGenerator.generateHitExplosion(bullet));
+				if (player.isLeader) {
+					effects.add(EffectGenerator.generateRedFlashPlayer(player));
+				}
+				else {
+					effects.add(EffectGenerator.generateRedFlashFollower(player));
+				}
 			}
 		}
 	}
@@ -365,16 +377,25 @@ public class MainGame extends Game implements Scene {
 				leftFollower.activate();
 				leftFollower.health = leftFollower.maxHealth;
 				playerTeam.add(leftFollower);
-				score -= FOLLOWER_COST;
+				score *= FOLLOWER_COST;
 				timeSincePurchased = 0;
 			}
 			else if (!rightFollower.isActive() && score > FOLLOWER_COST && timeSincePurchased > PURCHASE_WAIT_TIME) {
 				rightFollower.activate();
 				rightFollower.health = rightFollower.maxHealth;
 				playerTeam.add(rightFollower);
-				score -= FOLLOWER_COST;
+				score *= FOLLOWER_COST;
 				timeSincePurchased = 0;
 			}
+		}
+	}
+
+	private void spawnEnemies(int delta) {
+		enemyDispatchTimer += delta;
+		if (enemyDispatchTimer > ENEMY_DISPATCH_TIME * enemies.size()) {
+			Enemy newEnemy = EnemyGenerator.generateClassEnemy(new Vector2f(0, 0), new Vector2f(HALF_WIDTH, HALF_HEIGHT), classNames);
+			enemies.add(newEnemy);
+			enemyDispatchTimer = 0;
 		}
 	}
 

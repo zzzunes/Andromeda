@@ -5,15 +5,14 @@ import Tools.Vector2f;
 import VFX.Effect;
 import VFX.EffectGenerator;
 import VFX.EnemyHealthBar;
-import edu.utc.game.Texture;
+import edu.utc.game.Text;
 
 import java.util.ArrayList;
 
-public class Eye extends Enemy {
+public class TextEnemy extends Enemy {
 	private boolean destinationReached;
 	private int circlePosition;
 	private int bulletsPerFrame;
-	private Pattern pattern;
 	private boolean goingRight;
 	private boolean delayed;
 	private int patternTimer;
@@ -21,29 +20,32 @@ public class Eye extends Enemy {
 	private boolean halfAwake;
 	private boolean awake;
 	private boolean canFire;
+	private String name;
+	private Pattern pattern;
 
-	public Eye(Vector2f position, Vector2f destination, String texture, Pattern pattern, int delay) {
-		super(destination, texture);
+	public TextEnemy(Vector2f position, Vector2f destination, String name, int delay) {
+		this.destination = destination;
 		this.pos = position;
-		this.hitbox.setBounds((int) pos.x, (int) pos.y, 70, 70);
-		this.health = 1200;
-		this.maxHealth = 1200;
+		this.hitbox.setBounds((int) pos.x, (int) pos.y, 80 + (14 * name.length()), 35);
+		this.health = 300;
+		this.maxHealth = 300;
 		this.healthBar = new EnemyHealthBar(100, this);
-		this.speed = .065f;
+		this.speed = .07f;
 		this.destinationReached = false;
 		this.bulletTimer = 0;
 		this.bulletDelay = delay;
-		this.bulletSpeed = .9f;
-		this.pattern = pattern;
+		this.bulletSpeed = 1.1f;
 		this.bulletsPerFrame = 15;
 		this.goingRight = true;
 		this.delayed = false;
 		this.patternTimer = 0;
-		this.patternMaxTime = 4000;
+		this.patternMaxTime = 3000;
 		this.halfAwake = false;
 		this.awake = false;
 		this.canFire = false;
-		this.points = 7777;
+		this.points = name.length() * 1000;
+		this.pattern = Pattern.OCTO;
+		this.name = name;
 	}
 
 	@Override
@@ -57,14 +59,12 @@ public class Eye extends Enemy {
 		}
 		if (health <= 0) die();
 		else if (health < (maxHealth * .5f) && !awake) {
-			texture = new Texture("res/Enemy/eyeopen.png");
-			increaseDifficulty();
+			//increaseDifficulty();
 			moveBottomTop();
 			awake = true;
 		}
 		else if (health < (maxHealth * .75f) && !halfAwake) {
-			texture = new Texture("res/Enemy/eyehalf.png");
-			increaseDifficulty();
+			//increaseDifficulty();
 			moveMiddle();
 			halfAwake = true;
 		}
@@ -152,8 +152,8 @@ public class Eye extends Enemy {
 		for (int i = 0; i < bulletsPerFrame; i++) {
 			circlePosition += 25;
 			if (circlePosition > 360) circlePosition = 0;
-			float x = hitbox.width * (float) Math.cos(circlePosition * Math.PI / 180);
-			float y = hitbox.width * (float) Math.sin(circlePosition * Math.PI / 180);
+			float x = (hitbox.width/4f) * (float) Math.cos(circlePosition * Math.PI / 180);
+			float y = (hitbox.width/4f) * (float) Math.sin(circlePosition * Math.PI / 180);
 			Vector2f position = new Vector2f(x + center.x, y + center.y);
 			Vector2f direction = (position.subtract(center));
 			direction.normalize();
@@ -165,8 +165,8 @@ public class Eye extends Enemy {
 	private void fireCircle() {
 		Vector2f center = new Vector2f(pos.x + hitbox.width / 2f, pos.y + hitbox.height / 2f);
 		for (int i = 0; i < 360; i++) {
-			float x = hitbox.width * (float) Math.cos(i * Math.PI / 180);
-			float y = hitbox.width * (float) Math.sin(i * Math.PI / 180);
+			float x = (hitbox.width/2f) * (float) Math.cos(i * Math.PI / 180);
+			float y = (hitbox.width/2f) * (float) Math.sin(i * Math.PI / 180);
 			Vector2f position = new Vector2f(x + center.x, y + center.y);
 			Vector2f direction = (position.subtract(center));
 			direction.normalize();
@@ -178,7 +178,7 @@ public class Eye extends Enemy {
 	private void fireOcto() {
 		Vector2f center = new Vector2f(pos.x - 5 + hitbox.width / 2f, pos.y - 5 + hitbox.height / 2f);
 		ArrayList<Vector2f> positions = new ArrayList<>();
-		float outside = hitbox.width / 2f;
+		float outside = hitbox.width / 6f;
 		positions.add(new Vector2f(center.x - outside, center.y));
 		positions.add(new Vector2f(center.x + outside, center.y));
 		positions.add(new Vector2f(center.x - outside, center.y - outside));
@@ -216,7 +216,7 @@ public class Eye extends Enemy {
 
 	@Override
 	public void draw() {
-		texture.draw(this);
 		healthBar.draw();
+		new Text((int) pos.x - 20, (int) pos.y - 15, 40, 30, name).draw();
 	}
 }

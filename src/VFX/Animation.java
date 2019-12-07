@@ -1,5 +1,6 @@
 package VFX;
 
+import edu.utc.game.GameObject;
 import edu.utc.game.Sound;
 import edu.utc.game.Texture;
 
@@ -10,6 +11,7 @@ public class Animation implements Effect {
 	private Texture texture;
 	private int duration;
 	private Rectangle location;
+	private GameObject parent;
 	private int timeActive;
 	private boolean active;
 	private boolean animated;
@@ -18,11 +20,12 @@ public class Animation implements Effect {
 	private Sound sound;
 	private boolean soundPlayed;
 
-	public Animation(ArrayList<String> paths, int duration, Rectangle location) {
+	public Animation(ArrayList<String> paths, int duration, GameObject parent) {
 		this.texture = new Texture(paths.get(0));
 		this.paths = paths;
 		this.duration = duration;
-		this.location = location;
+		this.location = parent.getHitbox();
+		this.parent = parent;
 		this.timeActive = 0;
 		this.active = true;
 		this.animated = true;
@@ -47,6 +50,7 @@ public class Animation implements Effect {
 	}
 
 	public void update(int delta) {
+		if (parent != null) location = parent.getHitbox();
 		timeActive += delta;
 		if (animated) {
 			if (timeActive >= duration) {

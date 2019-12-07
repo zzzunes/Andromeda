@@ -25,6 +25,8 @@ public abstract class Enemy extends GameObject {
 		OCTO
 	}
 
+	public Enemy() {}
+
 	public Enemy(Vector2f destination, String texture) {
 		this.destination = destination;
 		this.texture = new Texture(texture);
