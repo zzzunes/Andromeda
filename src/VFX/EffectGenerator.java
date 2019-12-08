@@ -102,4 +102,5 @@ public class EffectGenerator {
 			bar = healthBar.get(0);
 		return bar;
 	}
+
 }

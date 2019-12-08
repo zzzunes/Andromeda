@@ -43,6 +43,7 @@ public class TextEnemy extends Enemy {
 		this.pattern = Pattern.OCTO;
 		this.text = new Text((int) pos.x - 20, (int) pos.y - 15, 40, 30, name);
 		this.text.setColor(color.r, color.g, color.b);
+		this.canPush = false;
 	}
 
 	@Override
@@ -214,7 +215,9 @@ public class TextEnemy extends Enemy {
 
 	@Override
 	public void draw() {
-		healthBar.draw();
-		text.draw();
+		if (!outOfBounds()) {
+			healthBar.draw();
+			text.draw();
+		}
 	}
 }

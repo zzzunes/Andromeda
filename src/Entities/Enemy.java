@@ -18,6 +18,7 @@ public abstract class Enemy extends GameObject {
 	protected HealthBar healthBar;
 	public float health;
 	public float maxHealth;
+	public boolean canPush;
 
 	public static enum Pattern {
 		STAR,
@@ -61,5 +62,9 @@ public abstract class Enemy extends GameObject {
 
 	public boolean readyToDie() {
 		return health <= 0;
+	}
+
+	public float getSpeed() {
+		return speed;
 	}
 }

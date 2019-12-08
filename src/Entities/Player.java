@@ -14,7 +14,7 @@ public class Player extends GameObject {
 	protected Vector2f pos;
 	protected Texture texture;
 	private HealthBar healthBar;
-	private Vector2f direction;
+	public Vector2f direction;
 	private float speed;
 	public float health;
 	public float maxHealth;
@@ -22,6 +22,9 @@ public class Player extends GameObject {
 	public int bulletRate;
 	public float bulletSpeed;
 	public boolean isLeader;
+	public boolean hit;
+	public int hitTimer;
+	public int hitTimePeriod;
 
 	public Player(Vector2f position) {
 		this.pos = position;
@@ -36,6 +39,9 @@ public class Player extends GameObject {
 		this.bulletRate = 35;
 		this.bulletSpeed = 1.75f;
 		this.isLeader = true;
+		this.hit = false;
+		this.hitTimer = 0;
+		this.hitTimePeriod = 500;
 	}
 
 	public Vector2f getLocation() {
@@ -49,7 +55,16 @@ public class Player extends GameObject {
 	@Override
 	public void update(int delta) {
 		bulletTimer += delta;
-		direction = new Vector2f(0, 0);
+		if (hit) {
+			hitTimer += delta;
+			if(hitTimer >= hitTimePeriod) {
+				hitTimer = 0;
+				hit = false;
+			}
+		}
+		else {
+			direction = new Vector2f(0, 0);
+		}
 		if (health <= 0) die();
 		healthBar.update(delta);
 		getMovementInput();
@@ -59,6 +74,9 @@ public class Player extends GameObject {
 	}
 
 	private void getMovementInput() {
+		if (hit) {
+			return;
+		}
 		if (Game.ui.keyPressed(GLFW.GLFW_KEY_A) || Game.ui.keyPressed(GLFW.GLFW_KEY_LEFT)) {
 			direction.x = -1;
 		}
@@ -74,8 +92,14 @@ public class Player extends GameObject {
 	}
 
 	private void move(int delta) {
-		pos.x += direction.x * speed * delta;
-		pos.y += direction.y * speed * delta;
+		if (hit) {
+			pos.x += direction.x * speed * delta * 2;
+			pos.y += direction.y * speed * delta * 2;
+		}
+		else {
+			pos.x += direction.x * speed * delta;
+			pos.y += direction.y * speed * delta;
+		}
 	}
 
 	private void checkBounds() {
@@ -92,6 +116,10 @@ public class Player extends GameObject {
 	protected void adjustHitBox() {
 		hitbox.x = (int) pos.x;
 		hitbox.y = (int) pos.y;
+	}
+
+	public float getSpeed() {
+		return speed;
 	}
 
 	@Override

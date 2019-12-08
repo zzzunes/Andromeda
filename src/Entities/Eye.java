@@ -44,6 +44,7 @@ public class Eye extends Enemy {
 		this.awake = false;
 		this.canFire = false;
 		this.points = 7777;
+		this.canPush = false;
 	}
 
 	@Override

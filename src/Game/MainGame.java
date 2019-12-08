@@ -21,7 +21,6 @@ public class MainGame extends Game implements Scene {
 	public static final int HEIGHT = 800;
 	public static final int HALF_WIDTH = WIDTH / 2;
 	public static final int HALF_HEIGHT = HEIGHT / 2;
-	private static final float SCROLL_SPEED = .95f;
 	private static final float FOLLOWER_COST = .9f;
 	private static final int PURCHASE_WAIT_TIME = 500;
 	private static final int TEXT_FLASH_RATE = 500;
@@ -30,9 +29,9 @@ public class MainGame extends Game implements Scene {
 	private static final int AFTER_DEATH_HANG_TIME = 2500;
 	private static final int ENEMY_DISPATCH_TIME = 7000;
 	private static final int FINAL_BOSS_WAIT_TIME = 5000;
+	private static final int HAND_WAIT_TIME = 8000;
 	private Background background1;
 	private Background background2;
-	private Background background3;
 	private Background pauseBackground;
 	private Text pauseText;
 	private Text scoreText;
@@ -64,10 +63,13 @@ public class MainGame extends Game implements Scene {
 	private int afterDeathTimer;
 	private int enemyDispatchTimer;
 	private int finalBossUnleashTimer;
+	private int handsDispatchTimer;
 	private boolean timeToDie;
 	private boolean finalBossSpawned;
 	public static Texture enemyBulletTexture;
 	public static Texture playerBulletTexture;
+	private Texture handTexture;
+	private Texture fistTexture;
 	public static List<Effect> effects;
 	public static List<Bullet> enemyBullets;
 
@@ -78,7 +80,6 @@ public class MainGame extends Game implements Scene {
 		EffectGenerator.initialize();
 		background1 = new Background(0, 0, WIDTH, HEIGHT, "deepspace2.png");
 		background2 = new Background(0, -HEIGHT, WIDTH, HEIGHT, "deepspace2.png");
-		background3 = new Background(0, -HEIGHT*2, WIDTH, HEIGHT, "deepspace2.png");
 		pauseBackground = new Background(0, 0, WIDTH, HEIGHT, "gray.png");
 		pauseText = new Text(HALF_WIDTH - 70, HALF_HEIGHT - 140, 40, 30, "PAUSED");
 		score = 0;
@@ -109,18 +110,20 @@ public class MainGame extends Game implements Scene {
 		playerTeam.add(rightFollower);
 		backgrounds.add(background1);
 		backgrounds.add(background2);
-		backgrounds.add(background3);
 		timeSincePurchased = 0;
 		textFlashTimer = 0;
 		introSongTimer = 0;
 		afterDeathTimer = 0;
 		finalBossUnleashTimer = 0;
+		handsDispatchTimer = 0;
 		enemyDispatchTimer = ENEMY_DISPATCH_TIME;
 		timeToDie = false;
 		finalBossSpawned = false;
 		invincibilityTimer = INVINCIBILITY_TIME;
 		enemyBulletTexture = new Texture("res/Bullets/roundBullet.png");
 		playerBulletTexture = new Texture("res/Bullets/playerBullet.png");
+		handTexture = new Texture("res/hand.png");
+		fistTexture = new Texture("res/hand2.png");
 		GLFW.glfwSetKeyCallback(Game.ui.getWindow(), pause);
 		music = new BackgroundMusic("weightOfTheWorld");
 		music.start();
@@ -143,7 +146,7 @@ public class MainGame extends Game implements Scene {
 	/* ******************************************************************** */
 
 	private void mainMenuScreen(int delta) {
-		updateBackgrounds(backgrounds, delta);
+		update(backgrounds, delta);
 		draw(backgrounds);
 		textFlashTimer += delta;
 		introSongTimer += delta;
@@ -227,13 +230,19 @@ public class MainGame extends Game implements Scene {
 			backgrounds.clear();
 			backgrounds.add(new Background(0, 0, WIDTH, HEIGHT, "Zone-202-big.png"));
 			backgrounds.add(new Background(0, -HEIGHT, WIDTH, HEIGHT, "Zone-202-big.png"));
-			backgrounds.add(new Background(0, -HEIGHT*2, WIDTH, HEIGHT, "Zone-202-big.png"));
-			backgrounds.add(new Background(0, -HEIGHT*3, WIDTH, HEIGHT, "Zone-202-big.png"));
 			music.change("kommSusserTod");
-			music.start();
+			//music.start();
 			enemies.add(EnemyGenerator.generateEyeStar(new Vector2f(HALF_WIDTH - 150, -100), new Vector2f(HALF_WIDTH + 75, 100)));
 			enemies.add(EnemyGenerator.generateEyeStar(new Vector2f(HALF_WIDTH + 75, -100), new Vector2f(HALF_WIDTH - 150, 100)));
 			finalBossSpawned = true;
+		}
+	}
+
+	private void spawnHands(int delta) {
+		handsDispatchTimer += delta;
+		if (handsDispatchTimer > HAND_WAIT_TIME) {
+			enemies.add(new Hand(handTexture, fistTexture, player));
+			handsDispatchTimer = 0;
 		}
 	}
 
@@ -260,6 +269,9 @@ public class MainGame extends Game implements Scene {
 		if (classNames.isEmpty() && enemies.isEmpty() && !finalBossSpawned) {
 			spawnFinalBoss(delta);
 		}
+		if (finalBossSpawned) {
+			spawnHands(delta);
+		}
 		spawnEnemies(delta);
 		purchaseFollowers(delta);
 		update(playerTeam, delta);
@@ -267,7 +279,7 @@ public class MainGame extends Game implements Scene {
 		update(enemyBullets, delta);
 		update(enemies, delta);
 		updateEffects(effects, delta);
-		updateBackgrounds(backgrounds, delta);
+		update(backgrounds, delta);
 		updateScore();
 	}
 
@@ -275,6 +287,7 @@ public class MainGame extends Game implements Scene {
 		detectHits(bullets, enemies);
 		if (invincibilityTimer >= INVINCIBILITY_TIME) {
 			detectPlayerDamage(playerTeam);
+			detectPush(enemies, playerTeam);
 		}
 	}
 
@@ -326,6 +339,22 @@ public class MainGame extends Game implements Scene {
 
 	private void stopEffects(List<Effect> effects) {
 		effects.removeIf(effect -> !effect.isActive());
+	}
+
+	private void detectPush(List<Enemy> enemies, List<Player> players) {
+		for (Enemy enemy : enemies) {
+			for (Player player : players) {
+				if (!player.isLeader || player.hit || !enemy.canPush) continue;
+				if (enemy.getHitbox().intersects(player.getHitbox())) {
+					player.hit = true;
+					Vector2f enemyPos = new Vector2f(enemy.getHitbox().x + enemy.getHitbox().width / 2f, enemy.getHitbox().y + enemy.getHitbox().height / 2f);
+					Vector2f playerPos = new Vector2f(player.getLocation().x + player.getHitbox().width / 2f, player.getLocation().y + player.getHitbox().height / 2f);
+					Vector2f direction = playerPos.subtract(enemyPos);
+					direction.normalize();
+					player.direction = direction;
+				}
+			}
+		}
 	}
 
 	private void detectHits(List<Bullet> bullets, List<Enemy> enemies) {
@@ -427,13 +456,6 @@ public class MainGame extends Game implements Scene {
 			Enemy newEnemy = EnemyGenerator.generateClassEnemy(new Vector2f(HALF_WIDTH, HALF_HEIGHT), classNames);
 			enemies.add(newEnemy);
 			enemyDispatchTimer = 0;
-		}
-	}
-
-	private void updateBackgrounds(List<Background> backgrounds, int delta) {
-		for (Background background : backgrounds) {
-			background.getHitbox().y += SCROLL_SPEED * delta;
-			if (background.getHitbox().y >= HEIGHT) background.setHeight(-HEIGHT);
 		}
 	}
 
