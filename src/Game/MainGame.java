@@ -48,6 +48,7 @@ public class MainGame extends Game implements Scene {
 	private Text gameOverText;
 	private Text welcomeText;
 	private Text pressEnterText;
+	private Text pressZReset;
 	private Player player;
 	private Follower leftFollower;
 	private Follower rightFollower;
@@ -99,19 +100,15 @@ public class MainGame extends Game implements Scene {
 		blue = new Background(0, 0, WIDTH, HEIGHT, "blue.png");
 		yellow = new Background(0, 0, WIDTH, HEIGHT, "yellow.png");
 		pauseText = new Text(HALF_WIDTH - 70, HALF_HEIGHT - 140, 40, 30, "PAUSED");
-		score = 0;
-		scoreText = new Text(0, HEIGHT - 50, 15, 10, "Score:" + score);
-		pauseScoreText = new Text(HALF_WIDTH - 60, HALF_HEIGHT - 80, 40, 30, "Score:" + score);
-		deathText = new Text(HALF_WIDTH-80, HALF_HEIGHT - 200, 40, 30, "Continue?");
-		continueYes = new Text(HALF_WIDTH-160, HALF_HEIGHT - 150, 40, 30, "Yes (Z)");
-		continueNo = new Text(HALF_WIDTH+60, HALF_HEIGHT - 150, 40, 30, "No (X)");
+		scoreText = new Text(0, HEIGHT - 50, 15, 10, "SCORE:" + score);
+		pauseScoreText = new Text(HALF_WIDTH - 60, HALF_HEIGHT - 80, 40, 30, "SCORE:" + score);
+		deathText = new Text(HALF_WIDTH-90, HALF_HEIGHT - 200, 40, 30, "CONTINUE?");
+		continueYes = new Text(HALF_WIDTH-170, HALF_HEIGHT - 150, 40, 30, "YES (Z)");
+		continueNo = new Text(HALF_WIDTH+40, HALF_HEIGHT - 150, 40, 30, "NO (X)");
 		gameOverText = new Text(HALF_WIDTH-100, HALF_HEIGHT-150, 40, 30, "GAME OVER");
 		welcomeText = new Text(HALF_WIDTH-100, HALF_HEIGHT-150, 40, 30, "ANDROMEDA");
-		pressEnterText = new Text(HALF_WIDTH-220, HALF_HEIGHT-100, 40, 30, "Press (Enter) to Begin");
-		paused = false;
-		gameOver = false;
-		setupDeath = false;
-		hasStartedGame = false;
+		pressEnterText = new Text(HALF_WIDTH-240, HALF_HEIGHT-100, 40, 30, "PRESS (ENTER) TO BEGIN");
+		pressZReset = new Text(HALF_WIDTH - 180, HALF_HEIGHT, 40, 40, "PRESS (Z) TO RESET");
 		player = new Player(new Vector2f(WIDTH / 2f, HEIGHT / 2f));
 		leftFollower = new Follower(player, true, "res/teamShip.png");
 		rightFollower = new Follower(player, false, "res/teamShip.png");
@@ -122,27 +119,7 @@ public class MainGame extends Game implements Scene {
 		backgrounds = new ArrayList<>();
 		playerTeam = new ArrayList<>();
 		availablePowerUps = new ArrayList<>();
-		classNames = EnemyGenerator.generateEnemyList();
 		powers = Collections.unmodifiableList(Arrays.asList(POWER.values()));
-		playerTeam.add(player);
-		playerTeam.add(leftFollower);
-		playerTeam.add(rightFollower);
-		backgrounds.add(background1);
-		backgrounds.add(background2);
-		timeSincePurchased = 0;
-		textFlashTimer = 0;
-		introSongTimer = 0;
-		afterDeathTimer = 0;
-		finalBossUnleashTimer = 0;
-		handsDispatchTimer = 0;
-		powerInvincibilityTimer = INVINCIBILITY_TIME;
-		powerSlowDownTimer = SLOW_DOWN_TIME;
-		enemyDispatchTimer = ENEMY_DISPATCH_TIME;
-		timeToDie = false;
-		finalBossSpawned = false;
-		isInvincible = false;
-		isSlowedDown = false;
-		invincibilityTimer = REVIVE_INVINCIBILITY_TIME;
 		enemyBulletTexture = new Texture("res/Bullets/roundBullet.png");
 		playerBulletTexture = new Texture("res/Bullets/playerBullet.png");
 		handTexture = new Texture("res/hand.png");
@@ -150,10 +127,9 @@ public class MainGame extends Game implements Scene {
 		blackSlot = new Texture("res/Backgrounds/blackSlot.png");
 		spellSlotOne = new SpellSlot(blackSlot, new Vector2f(WIDTH - 175,HEIGHT - 75));
 		spellSlotTwo = new SpellSlot(blackSlot, new Vector2f(WIDTH - 100,HEIGHT - 75));
-		GLFW.glfwSetKeyCallback(Game.ui.getWindow(), pause);
-		GLFW.glfwSetKeyCallback(Game.ui.getWindow(), ability);
+		GLFW.glfwSetKeyCallback(Game.ui.getWindow(), keys);
 		music = new BackgroundMusic("weightOfTheWorld");
-		music.start();
+		resetGame();
 	}
 
 	public Scene drawFrame(int delta) {
@@ -236,6 +212,10 @@ public class MainGame extends Game implements Scene {
 		// gameOverMusic.play();
 		gameOverText.draw();
 		pauseScoreText.draw();
+		pressZReset.draw();
+		if (Game.ui.keyPressed(GLFW.GLFW_KEY_Z)) {
+			resetGame();
+		}
 	}
 
 	private void runGame(int delta) {
@@ -249,6 +229,50 @@ public class MainGame extends Game implements Scene {
 	/* ******************************************************************** */
 	/* ********************** Game Scene Options End ********************** */
 	/* ******************************************************************** */
+
+	private void resetGame() {
+		score = 0;
+		timeSincePurchased = 0;
+		textFlashTimer = 0;
+		introSongTimer = 0;
+		afterDeathTimer = 0;
+		finalBossUnleashTimer = 0;
+		handsDispatchTimer = 0;
+		powerInvincibilityTimer = INVINCIBILITY_TIME;
+		powerSlowDownTimer = SLOW_DOWN_TIME;
+		enemyDispatchTimer = ENEMY_DISPATCH_TIME;
+		timeToDie = false;
+		finalBossSpawned = false;
+		isInvincible = false;
+		isSlowedDown = false;
+		invincibilityTimer = REVIVE_INVINCIBILITY_TIME;
+		paused = false;
+		gameOver = false;
+		setupDeath = false;
+		hasStartedGame = false;
+		bullets.clear();
+		enemies.clear();
+		enemyBullets.clear();
+		effects.clear();
+		playerTeam.clear();
+		player.health = player.maxHealth;
+		leftFollower.health = leftFollower.maxHealth;
+		rightFollower.health = rightFollower.maxHealth;
+		player.activate();
+		leftFollower.activate();
+		rightFollower.activate();
+		playerTeam.add(player);
+		playerTeam.add(leftFollower);
+		playerTeam.add(rightFollower);
+		classNames = EnemyGenerator.generateEnemyList();
+		backgrounds.clear();
+		backgrounds.add(background1);
+		backgrounds.add(background2);
+		spellSlotOne.power = null;
+		spellSlotTwo.power = null;
+		music.change("weightOfTheWorld");
+		music.start();
+	}
 
 	private void spawnFinalBoss(int delta) {
 		music.stop();
@@ -553,15 +577,15 @@ public class MainGame extends Game implements Scene {
 			scoreCopy /= 10;
 			leftShift += 10;
 		}
-		scoreText = new Text(0, HEIGHT - 50, 30, 25, "Score: " + score);
-		pauseScoreText = new Text(HALF_WIDTH - 80  - leftShift, HALF_HEIGHT - 80, 40, 30, "Score: " + score);
+		scoreText = new Text(0, HEIGHT - 50, 30, 25, "SCORE: " + score);
+		pauseScoreText = new Text(HALF_WIDTH - 80  - leftShift, HALF_HEIGHT - 80, 40, 30, "SCORE: " + score);
 	}
 
 	/* ******************************************************************** */
 	/* ************************* Callback Functions *********************** */
 	/* ******************************************************************** */
 
-	GLFWKeyCallback pause = new GLFWKeyCallback() {
+	GLFWKeyCallback keys = new GLFWKeyCallback() {
 		@Override
 		public void invoke(long window, int key, int scancode, int action, int mods) {
 			if (!paused && action == GLFW.GLFW_PRESS && key == GLFW.GLFW_KEY_BACKSPACE) {
@@ -572,12 +596,6 @@ public class MainGame extends Game implements Scene {
 				paused = false;
 				music.start();
 			}
-		}
-	};
-
-	GLFWKeyCallback ability = new GLFWKeyCallback() {
-		@Override
-		public void invoke(long window, int key, int scancode, int action, int mods) {
 			if (action == GLFW.GLFW_PRESS && key == GLFW.GLFW_KEY_C && spellSlotOne.power != null) {
 				usePower(spellSlotOne.power);
 				spellSlotOne.power = null;
