@@ -30,13 +30,15 @@ public class MainGame extends Game implements Scene {
 	private static final int ENEMY_DISPATCH_TIME = 7000;
 	private static final int FINAL_BOSS_WAIT_TIME = 5000;
 	private static final int HAND_WAIT_TIME = 30000;
-	private static final int INVINCIBILITY_TIME = 5000;
-	private static final int SLOW_DOWN_TIME = 5000;
-	private static final int REGEN_AMOUNT = 75;
-	private static final int DOUBLE_BULLET_RATE = 20;
+	private static final int INVINCIBILITY_TIME = 7500;
+	private static final int SLOW_DOWN_TIME = 7500;
+	private static final int REGEN_AMOUNT = 50;
+	private static final int DOUBLE_BULLET_RATE = 15;
 	private Background background1;
 	private Background background2;
 	private Background pauseBackground;
+	private Background blue;
+	private Background yellow;
 	private Text pauseText;
 	private Text scoreText;
 	private Text pauseScoreText;
@@ -72,13 +74,18 @@ public class MainGame extends Game implements Scene {
 	private int powerSlowDownTimer;
 	private boolean timeToDie;
 	private boolean finalBossSpawned;
+	private boolean isInvincible;
+	private boolean isSlowedDown;
 	public static Texture enemyBulletTexture;
 	public static Texture playerBulletTexture;
 	private Texture handTexture;
 	private Texture fistTexture;
+	private Texture blackSlot;
+	private SpellSlot spellSlotOne;
+	private SpellSlot spellSlotTwo;
 	public static List<Effect> effects;
 	public static List<Bullet> enemyBullets;
-	public static List<PowerUp> powerUpForPickup;
+	public static List<PowerUp> availablePowerUps;
 	public static List<POWER> powers;
 
 	public MainGame() {
@@ -89,6 +96,8 @@ public class MainGame extends Game implements Scene {
 		background1 = new Background(0, 0, WIDTH, HEIGHT, "deepspace2.png");
 		background2 = new Background(0, -HEIGHT, WIDTH, HEIGHT, "deepspace2.png");
 		pauseBackground = new Background(0, 0, WIDTH, HEIGHT, "gray.png");
+		blue = new Background(0, 0, WIDTH, HEIGHT, "blue.png");
+		yellow = new Background(0, 0, WIDTH, HEIGHT, "yellow.png");
 		pauseText = new Text(HALF_WIDTH - 70, HALF_HEIGHT - 140, 40, 30, "PAUSED");
 		score = 0;
 		scoreText = new Text(0, HEIGHT - 50, 15, 10, "Score:" + score);
@@ -112,7 +121,7 @@ public class MainGame extends Game implements Scene {
 		effects = new ArrayList<>();
 		backgrounds = new ArrayList<>();
 		playerTeam = new ArrayList<>();
-		powerUpForPickup = new ArrayList<>();
+		availablePowerUps = new ArrayList<>();
 		classNames = EnemyGenerator.generateEnemyList();
 		powers = Collections.unmodifiableList(Arrays.asList(POWER.values()));
 		playerTeam.add(player);
@@ -131,12 +140,18 @@ public class MainGame extends Game implements Scene {
 		enemyDispatchTimer = ENEMY_DISPATCH_TIME;
 		timeToDie = false;
 		finalBossSpawned = false;
+		isInvincible = false;
+		isSlowedDown = false;
 		invincibilityTimer = REVIVE_INVINCIBILITY_TIME;
 		enemyBulletTexture = new Texture("res/Bullets/roundBullet.png");
 		playerBulletTexture = new Texture("res/Bullets/playerBullet.png");
 		handTexture = new Texture("res/hand.png");
 		fistTexture = new Texture("res/hand2.png");
+		blackSlot = new Texture("res/Backgrounds/blackSlot.png");
+		spellSlotOne = new SpellSlot(blackSlot, new Vector2f(WIDTH - 175,HEIGHT - 75));
+		spellSlotTwo = new SpellSlot(blackSlot, new Vector2f(WIDTH - 100,HEIGHT - 75));
 		GLFW.glfwSetKeyCallback(Game.ui.getWindow(), pause);
+		GLFW.glfwSetKeyCallback(Game.ui.getWindow(), ability);
 		music = new BackgroundMusic("weightOfTheWorld");
 		music.start();
 	}
@@ -242,7 +257,7 @@ public class MainGame extends Game implements Scene {
 			backgrounds.clear();
 			backgrounds.add(new Background(0, 0, WIDTH, HEIGHT, "Zone-202-big.png"));
 			backgrounds.add(new Background(0, -HEIGHT, WIDTH, HEIGHT, "Zone-202-big.png"));
-			music.change("kommSusserTod");
+			music.change("cruelAngelThesis");
 			music.start();
 			enemies.add(EnemyGenerator.generateEyeStar(new Vector2f(HALF_WIDTH - 150, -100), new Vector2f(HALF_WIDTH + 75, 100)));
 			enemies.add(EnemyGenerator.generateEyeStar(new Vector2f(HALF_WIDTH + 75, -100), new Vector2f(HALF_WIDTH - 150, 100)));
@@ -278,12 +293,13 @@ public class MainGame extends Game implements Scene {
 			update(playerTeam, delta);
 			update(bullets, delta);
 			powerSlowDownTimer += delta;
-			// Flag to draw slow down background
+			isSlowedDown = true;
 		}
 		else {
 			updateLogic(delta);
 			update(playerTeam, delta);
 			update(bullets, delta);
+			isSlowedDown = false;
 		}
 	}
 
@@ -291,7 +307,8 @@ public class MainGame extends Game implements Scene {
 		if (invincibilityTimer < REVIVE_INVINCIBILITY_TIME) {
 			invincibilityTimer += delta;
 		}
-		if (powerInvincibilityTimer < INVINCIBILITY_TIME) {
+		isInvincible = powerInvincibilityTimer < INVINCIBILITY_TIME;
+		if (isInvincible) {
 			powerInvincibilityTimer += delta;
 		}
 		if (leaderIsDead()) {
@@ -306,6 +323,7 @@ public class MainGame extends Game implements Scene {
 		}
 		spawnEnemies(delta);
 		purchaseFollowers(delta);
+		update(availablePowerUps, delta);
 		update(enemyBullets, delta);
 		update(enemies, delta);
 		updateEffects(effects, delta);
@@ -319,14 +337,11 @@ public class MainGame extends Game implements Scene {
 			detectPlayerDamage(playerTeam);
 			detectPush(enemies, playerTeam);
 		}
-		else {
-			// Flag to draw invincibility background
-		}
-		detectPickUp(powerUpForPickup, player);
+		detectPickUp(availablePowerUps, player);
 	}
 
 	private void deactivate() {
-		deactivate(powerUpForPickup);
+		deactivate(availablePowerUps);
 		deactivate(playerTeam);
 		deactivate(bullets);
 		deactivate(enemyBullets);
@@ -336,12 +351,16 @@ public class MainGame extends Game implements Scene {
 
 	private void draw() {
 		draw(backgrounds);
-		draw(powerUpForPickup);
+		if (isSlowedDown) blue.draw();
+		if (isInvincible) yellow.draw();
+		draw(availablePowerUps);
 		draw(playerTeam);
 		draw(enemies);
 		draw(bullets);
 		draw(enemyBullets);
 		drawEffects(effects);
+		spellSlotOne.draw();
+		spellSlotTwo.draw();
 		scoreText.draw();
 	}
 
@@ -437,22 +456,31 @@ public class MainGame extends Game implements Scene {
 		for (PowerUp power : powers) {
 			if (power.getHitbox().intersects(player.getHitbox())) {
 				System.out.println("Power picked up: " + power.power);
-				switch(power.power) {
-					case SLOW_TIME:
-						powerSlowDownTimer = 0;
-						break;
-					case DOUBLE_SHOT:
-						player.speedShot(DOUBLE_BULLET_RATE);
-						break;
-					case HEALTH_REGEN:
-						player.health = Math.min(player.health + REGEN_AMOUNT, player.maxHealth);
-						break;
-					case INVINCIBILITY:
-						powerInvincibilityTimer = 0;
-						break;
+				if (spellSlotOne.power == null) {
+					spellSlotOne.setPower(new PowerUp(power));
+				}
+				else if (spellSlotTwo.power == null) {
+					spellSlotTwo.setPower(new PowerUp(power));
 				}
 				power.deactivate();
 			}
+		}
+	}
+
+	private void usePower(PowerUp power) {
+		switch(power.power) {
+			case SLOW_TIME:
+				powerSlowDownTimer = 0;
+				break;
+			case DOUBLE_SHOT:
+				player.speedShot(DOUBLE_BULLET_RATE);
+				break;
+			case HEALTH_REGEN:
+				player.health = Math.min(player.health + REGEN_AMOUNT, player.maxHealth);
+				break;
+			case INVINCIBILITY:
+				powerInvincibilityTimer = 0;
+				break;
 		}
 	}
 
@@ -543,6 +571,20 @@ public class MainGame extends Game implements Scene {
 			else if (paused && action == GLFW.GLFW_PRESS && key == GLFW.GLFW_KEY_BACKSPACE) {
 				paused = false;
 				music.start();
+			}
+		}
+	};
+
+	GLFWKeyCallback ability = new GLFWKeyCallback() {
+		@Override
+		public void invoke(long window, int key, int scancode, int action, int mods) {
+			if (action == GLFW.GLFW_PRESS && key == GLFW.GLFW_KEY_C && spellSlotOne.power != null) {
+				usePower(spellSlotOne.power);
+				spellSlotOne.power = null;
+			}
+			if (action == GLFW.GLFW_PRESS && key == GLFW.GLFW_KEY_V && spellSlotTwo.power != null) {
+				usePower(spellSlotTwo.power);
+				spellSlotTwo.power = null;
 			}
 		}
 	};

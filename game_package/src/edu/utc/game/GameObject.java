@@ -29,6 +29,10 @@ public class GameObject {
 	public void deactivate() { active=false; }
 
 	public void activate() { active=true; }
+
+	public void setHixbox(Rectangle r) {
+		this.hitbox = r;
+	}
 	
 	public boolean intersects(GameObject other)
 	{

@@ -50,7 +50,7 @@ public class Player extends GameObject {
 		this.hitTimePeriod = 500;
 		this.speedBulletTimer = 0;
 		this.speedBulletsActive = false;
-		this.maxSpeedBulletTime = 10000;
+		this.maxSpeedBulletTime = 7500;
 	}
 
 	public void speedShot(int newRate) {
@@ -70,9 +70,10 @@ public class Player extends GameObject {
 	public void update(int delta) {
 		if (speedBulletsActive) {
 			speedBulletTimer += delta;
-			if (speedBulletTimer > maxSpeedBulletTime) {
+			if (speedBulletTimer >= maxSpeedBulletTime) {
 				speedBulletsActive = false;
 				bulletRate = permanentBulletRate;
+				speedBulletTimer = 0;
 			}
 		}
 		bulletTimer += delta;

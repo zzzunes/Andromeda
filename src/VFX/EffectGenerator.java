@@ -1,12 +1,15 @@
 package VFX;
 
 import Entities.Bullet;
+import Entities.POWER;
 import edu.utc.game.GameObject;
 import edu.utc.game.Sound;
 import edu.utc.game.Texture;
 
 import java.awt.*;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 public class EffectGenerator {
 	private static ArrayList<Texture> explosions = new ArrayList<>();
@@ -15,6 +18,7 @@ public class EffectGenerator {
 	private static ArrayList<Texture> healthBar = new ArrayList<>();
 	private static Texture pow;
 	private static Sound deathSound;
+	private static Map<POWER, Texture> powerMap = new HashMap<>();
 
 	public static void initialize() {
 		explosions.add(new Texture("res/Explosion/one.png"));
@@ -52,6 +56,14 @@ public class EffectGenerator {
 		healthBar.add(new Texture("res/HealthBar/health10.png"));
 		pow = new Texture("res/pow.png");
 		deathSound = new Sound("res/Sounds/boom.wav");
+		powerMap.put(POWER.INVINCIBILITY, new Texture("res/powerUpIcons/invincibility.png"));
+		powerMap.put(POWER.DOUBLE_SHOT, new Texture("res/powerUpIcons/bullets.png"));
+		powerMap.put(POWER.SLOW_TIME, new Texture("res/powerUpIcons/Hourglass.png"));
+		powerMap.put(POWER.HEALTH_REGEN, new Texture("res/powerUpIcons/health.png"));
+	}
+
+	public static Map<POWER, Texture> getPowerMap() {
+		return powerMap;
 	}
 
 	public static Effect generateHitExplosion(GameObject obj) {

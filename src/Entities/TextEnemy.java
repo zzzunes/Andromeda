@@ -4,6 +4,7 @@ import Game.MainGame;
 import Tools.Vector2f;
 import VFX.*;
 import edu.utc.game.Text;
+import edu.utc.game.Texture;
 
 import java.util.ArrayList;
 import java.util.Random;
@@ -215,14 +216,14 @@ public class TextEnemy extends Enemy {
 		Effect explode = EffectGenerator.generateDeathExplosion(this);
 		MainGame.effects.add(explode);
 		float powerChance = r.nextFloat() * 100;
-		if (powerChance <= 20 || powerChance >= 80) {
-			PowerUp newPower = new PowerUp(this, MainGame.playerBulletTexture, MainGame.powers.get(r.nextInt(MainGame.powers.size())));
-			MainGame.powerUpForPickup.add(newPower);
+		if (powerChance <= 20 || powerChance >= 85) {
+			POWER power = MainGame.powers.get(r.nextInt(MainGame.powers.size()));
+			Texture powerTexture = EffectGenerator.getPowerMap().get(power);
+			PowerUp newPower = new PowerUp(this, powerTexture, power);
+			MainGame.availablePowerUps.add(newPower);
 			System.out.println(newPower.power);
 		}
 	}
-
-
 
 	@Override
 	public void draw() {
