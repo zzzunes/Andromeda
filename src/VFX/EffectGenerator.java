@@ -4,6 +4,7 @@ import Entities.Bullet;
 import Entities.POWER;
 import edu.utc.game.GameObject;
 import edu.utc.game.Sound;
+import edu.utc.game.Text;
 import edu.utc.game.Texture;
 
 import java.awt.*;

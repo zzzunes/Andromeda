@@ -109,7 +109,8 @@ public class Text extends GameObject {
 	}
 
 	public void setPosition(Vector2f vec) {
-		this.hitbox.setLocation((int) vec.x, (int) vec.y);
+		this.x = (int) vec.x;
+		this.y = (int) vec.y;
 	}
 
 	public void update(int delta) {

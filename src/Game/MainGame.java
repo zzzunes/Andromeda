@@ -1,6 +1,7 @@
 package Game;
 
 import Entities.*;
+import Tools.ScoreHandler;
 import Tools.Vector2f;
 import VFX.*;
 import edu.utc.game.*;
@@ -10,6 +11,8 @@ import org.lwjgl.opengl.GL11;
 
 import java.util.*;
 import java.util.List;
+
+import static org.lwjgl.glfw.GLFW.glfwSetWindowShouldClose;
 
 public class MainGame extends Game implements Scene {
 	public static void main(String[] args) {
@@ -35,6 +38,7 @@ public class MainGame extends Game implements Scene {
 	private static final int SLOW_DOWN_TIME = 7500;
 	private static final int REGEN_AMOUNT = 50;
 	private static final int DOUBLE_BULLET_RATE = 15;
+	private static final int POST_GAME_DELAY = 1500;
 	private Background background1;
 	private Background background2;
 	private Background pauseBackground;
@@ -50,6 +54,24 @@ public class MainGame extends Game implements Scene {
 	private Text welcomeText;
 	private Text pressEnterText;
 	private Text pressZReset;
+	private Text congratulations;
+	private Text thankYouFor;
+	private Text playingMyGame;
+	private Text youMadeItThis;
+	private Text farThroughWill;
+	private Text pleaseEnterYour;
+	private Text nameSoThatOthers;
+	private Text knowWhoCameBefore;
+	private Text playerName;
+	private Text visibleOnEnter;
+	private Text isThatRight;
+	private Text answerYes;
+	private Text answerNo;
+	private Text thankYou;
+	private Text yourScoresHave;
+	private Text beenSaved;
+	private Text wouldYouLike;
+	private Text toPlayAgain;
 	private Player player;
 	private Follower leftFollower;
 	private Follower rightFollower;
@@ -76,10 +98,18 @@ public class MainGame extends Game implements Scene {
 	private int powerInvincibilityTimer;
 	private int powerSlowDownTimer;
 	private int powerSpawnTimer;
+	private int postGameDelayTimer;
+	private int finalDialogueTimer;
+	private int postScoreDialogueTimer;
 	private boolean timeToDie;
 	private boolean finalBossSpawned;
 	private boolean isInvincible;
 	private boolean isSlowedDown;
+	private boolean timeToEnd;
+	private boolean finalMusicStarted;
+	private boolean nameEntered;
+	private boolean nameAccepted;
+	private boolean finishedWritingScores;
 	public static Texture enemyBulletTexture;
 	public static Texture playerBulletTexture;
 	private Texture handTexture;
@@ -88,6 +118,7 @@ public class MainGame extends Game implements Scene {
 	private SpellSlot spellSlotOne;
 	private SpellSlot spellSlotTwo;
 	private Random r;
+	private String enteredName;
 	public static List<Effect> effects;
 	public static List<Bullet> enemyBullets;
 	public static List<PowerUp> availablePowerUps;
@@ -113,6 +144,24 @@ public class MainGame extends Game implements Scene {
 		welcomeText = new Text(HALF_WIDTH-100, HALF_HEIGHT-150, 40, 30, "ANDROMEDA");
 		pressEnterText = new Text(HALF_WIDTH-240, HALF_HEIGHT-100, 40, 30, "PRESS (ENTER) TO BEGIN");
 		pressZReset = new Text(HALF_WIDTH - 180, HALF_HEIGHT, 40, 40, "PRESS (Z) TO RESET");
+		congratulations = new Text(HALF_WIDTH-150, HALF_HEIGHT-150, 40, 30, "CONGRATULATIONS");
+		thankYouFor = new Text(HALF_WIDTH-140, HALF_HEIGHT-150, 40, 30, "THANK YOU FOR");
+		playingMyGame = new Text(HALF_WIDTH-160, HALF_HEIGHT-100, 40, 30, "PLAYING MY GAME");
+		youMadeItThis = new Text(HALF_WIDTH-160, HALF_HEIGHT-150, 40, 30, "YOU MADE IT THIS");
+		farThroughWill = new Text(HALF_WIDTH-220, HALF_HEIGHT-100, 40, 30, "FAR THROUGH SHEER WILL");
+		pleaseEnterYour = new Text(HALF_WIDTH-170, HALF_HEIGHT-150, 40, 30, "PLEASE ENTER YOUR");
+		nameSoThatOthers = new Text(HALF_WIDTH-190, HALF_HEIGHT-100, 40, 30, "NAME SO THAT OTHERS");
+		knowWhoCameBefore = new Text(HALF_WIDTH-200, HALF_HEIGHT-50, 40, 30, "KNOW WHO CAME BEFORE");
+		visibleOnEnter = new Text(HALF_WIDTH-200, HALF_HEIGHT, 40, 30, "VISIBLE AFTER (ENTER)");
+		playerName = new Text(HALF_WIDTH, HALF_HEIGHT-150, 40, 30, "");
+		isThatRight = new Text(HALF_WIDTH-150, HALF_HEIGHT-100, 40, 30, "IS THAT RIGHT?");
+		answerYes = new Text(HALF_WIDTH-170, HALF_HEIGHT - 50, 40, 30, "YES (Z)");
+		answerNo = new Text(HALF_WIDTH+40, HALF_HEIGHT - 50, 40, 30, "NO (X)");
+		thankYou = new Text(HALF_WIDTH-110, HALF_HEIGHT-150, 40, 30, "THANK YOU");
+		yourScoresHave = new Text(HALF_WIDTH-150, HALF_HEIGHT-150, 40, 30, "YOUR SCORE HAS");
+		beenSaved = new Text(HALF_WIDTH-120, HALF_HEIGHT-100, 40, 30, "BEEN SAVED");
+		wouldYouLike = new Text(HALF_WIDTH-150, HALF_HEIGHT-150, 40, 30, "WOULD YOU LIKE");
+		toPlayAgain = new Text(HALF_WIDTH-150, HALF_HEIGHT-100, 40, 30, "TO PLAY AGAIN?");
 		player = new Player(new Vector2f(WIDTH / 2f, HEIGHT / 2f));
 		leftFollower = new Follower(player, true, "res/teamShip.png");
 		rightFollower = new Follower(player, false, "res/teamShip.png");
@@ -139,7 +188,6 @@ public class MainGame extends Game implements Scene {
 		r = new Random();
 		spellSlotOne = new SpellSlot(blackSlot, new Vector2f(WIDTH - 175,HEIGHT - 75));
 		spellSlotTwo = new SpellSlot(blackSlot, new Vector2f(WIDTH - 100,HEIGHT - 75));
-		GLFW.glfwSetKeyCallback(Game.ui.getWindow(), keys);
 		music = new BackgroundMusic("weightOfTheWorld");
 		resetGame();
 	}
@@ -148,6 +196,7 @@ public class MainGame extends Game implements Scene {
 		GL11.glClear(GL11.GL_COLOR_BUFFER_BIT | GL11.GL_DEPTH_BUFFER_BIT);
 
 		if (!hasStartedGame) mainMenuScreen(delta);
+		else if (timeToEnd) endTheGame(delta);
 		else if (gameOver) gameOverScreen();
 		else if (timeToDie) deathScreen(delta);
 		else if (paused) pauseScreen();
@@ -230,6 +279,86 @@ public class MainGame extends Game implements Scene {
 		}
 	}
 
+	private void endTheGame(int delta) {
+		if (!finalMusicStarted) {
+			music.change("kommSusserTod");
+			music.start();
+			finalMusicStarted = true;
+			GLFW.glfwSetKeyCallback(Game.ui.getWindow(), typing);
+		}
+		if (finalDialogueTimer < 10000) {
+			finalDialogueTimer += delta;
+		}
+		if (finalDialogueTimer < 3000) {
+			congratulations.draw();
+		}
+		else if (finalDialogueTimer < 6000) {
+			thankYouFor.draw();
+			playingMyGame.draw();
+		}
+		else if (finalDialogueTimer < 9000) {
+			youMadeItThis.draw();
+			farThroughWill.draw();
+		}
+		else if (!nameEntered) {
+			pleaseEnterYour.draw();
+			nameSoThatOthers.draw();
+			knowWhoCameBefore.draw();
+			visibleOnEnter.draw();
+		}
+		if (nameEntered && !nameAccepted) {
+			playerName.draw();
+			isThatRight.draw();
+			answerYes.draw();
+			answerNo.draw();
+			if (Game.ui.keyPressed(GLFW.GLFW_KEY_Z)) {
+				nameAccepted = true;
+			}
+			else if (Game.ui.keyPressed(GLFW.GLFW_KEY_X)) {
+				nameEntered = false;
+				enteredName = "";
+			}
+		}
+		if (nameAccepted && !finishedWritingScores) {
+			HashMap<String, Integer> scores;
+			try {
+				scores = ScoreHandler.readScores();
+			} catch (Exception e) {
+				scores = new HashMap<>();
+				System.out.println(e.getMessage());
+			}
+			scores.put(enteredName, score);
+			try {
+				ScoreHandler.writeScores(scores);
+			} catch (Exception e) {
+				System.out.println(e.getMessage());
+			}
+			finishedWritingScores = true;
+		}
+		if (finishedWritingScores) {
+			if (postScoreDialogueTimer < 10000) postScoreDialogueTimer += delta;
+			if (postScoreDialogueTimer < 3000) {
+				thankYou.draw();
+			}
+			else if (postScoreDialogueTimer < 6000) {
+				yourScoresHave.draw();
+				beenSaved.draw();
+			}
+			else {
+				wouldYouLike.draw();
+				toPlayAgain.draw();
+				answerYes.draw();
+				answerNo.draw();
+				if (Game.ui.keyPressed(GLFW.GLFW_KEY_Z)) {
+					resetGame();
+				}
+				else if (Game.ui.keyPressed(GLFW.GLFW_KEY_X)) {
+					glfwSetWindowShouldClose(Game.ui.getWindow(), true);
+				}
+			}
+		}
+	}
+
 	private void runGame(int delta) {
 		firePlayerBullets();
 		updateGame(delta);
@@ -251,18 +380,26 @@ public class MainGame extends Game implements Scene {
 		finalBossUnleashTimer = 0;
 		handsDispatchTimer = 0;
 		powerSpawnTimer = 0;
+		postGameDelayTimer = 0;
+		finalDialogueTimer = 0;
+		postScoreDialogueTimer = 0;
 		powerInvincibilityTimer = INVINCIBILITY_TIME;
 		powerSlowDownTimer = SLOW_DOWN_TIME;
 		enemyDispatchTimer = ENEMY_DISPATCH_TIME;
+		invincibilityTimer = REVIVE_INVINCIBILITY_TIME;
 		timeToDie = false;
 		finalBossSpawned = false;
 		isInvincible = false;
 		isSlowedDown = false;
-		invincibilityTimer = REVIVE_INVINCIBILITY_TIME;
 		paused = false;
 		gameOver = false;
 		setupDeath = false;
 		hasStartedGame = false;
+		timeToEnd = false;
+		finalMusicStarted = false;
+		nameEntered = false;
+		nameAccepted = false;
+		finishedWritingScores = false;
 		bullets.clear();
 		enemies.clear();
 		enemyBullets.clear();
@@ -277,12 +414,14 @@ public class MainGame extends Game implements Scene {
 		playerTeam.add(player);
 		playerTeam.add(leftFollower);
 		playerTeam.add(rightFollower);
-		classNames = new ArrayList<>();//EnemyGenerator.generateEnemyList();
+		classNames = EnemyGenerator.generateEnemyList();
 		backgrounds.clear();
 		backgrounds.add(background1);
 		backgrounds.add(background2);
 		spellSlotOne.power = null;
 		spellSlotTwo.power = null;
+		enteredName = "";
+		GLFW.glfwSetKeyCallback(Game.ui.getWindow(), keys);
 		music.change("weightOfTheWorld");
 		music.start();
 	}
@@ -369,6 +508,12 @@ public class MainGame extends Game implements Scene {
 		if (finalBossSpawned && !enemies.isEmpty()) {
 			spawnHands(delta);
 			spawnPowers(delta);
+		}
+		if (finalBossSpawned && enemies.isEmpty()) {
+			postGameDelayTimer += delta;
+			if (postGameDelayTimer > POST_GAME_DELAY) {
+				timeToEnd = true;
+			}
 		}
 		spawnEnemies(delta);
 		purchaseFollowers(delta);
@@ -627,6 +772,20 @@ public class MainGame extends Game implements Scene {
 			if (action == GLFW.GLFW_PRESS && key == GLFW.GLFW_KEY_V && spellSlotTwo.power != null) {
 				usePower(spellSlotTwo.power);
 				spellSlotTwo.power = null;
+			}
+		}
+	};
+
+	GLFWKeyCallback typing = new GLFWKeyCallback() {
+		@Override
+		public void invoke(long window, int key, int scancode, int action, int mods) {
+			if (action == GLFW.GLFW_PRESS && key != GLFW.GLFW_KEY_ENTER && enteredName.length() < 14 && !nameEntered) {
+				enteredName += Character.toString((char) key);
+			}
+			if (action == GLFW.GLFW_PRESS && key == GLFW.GLFW_KEY_ENTER) {
+				nameEntered = true;
+				playerName.setText(enteredName);
+				playerName.setPosition(new Vector2f(HALF_WIDTH - (10 * enteredName.length()), playerName.y));
 			}
 		}
 	};
