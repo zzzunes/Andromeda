@@ -6,6 +6,7 @@ import VFX.*;
 import edu.utc.game.Text;
 
 import java.util.ArrayList;
+import java.util.Random;
 
 public class TextEnemy extends Enemy {
 	private boolean destinationReached;
@@ -19,6 +20,7 @@ public class TextEnemy extends Enemy {
 	private boolean awake;
 	private Pattern pattern;
 	private Text text;
+	private Random r;
 
 	public TextEnemy(Vector2f position, Vector2f destination, String name, int delay, Color color) {
 		this.destination = destination;
@@ -44,6 +46,7 @@ public class TextEnemy extends Enemy {
 		this.text = new Text((int) pos.x - 20, (int) pos.y - 15, 40, 30, name);
 		this.text.setColor(color.r, color.g, color.b);
 		this.canPush = false;
+		this.r = new Random();
 	}
 
 	@Override
@@ -211,7 +214,15 @@ public class TextEnemy extends Enemy {
 		deactivate();
 		Effect explode = EffectGenerator.generateDeathExplosion(this);
 		MainGame.effects.add(explode);
+		float powerChance = r.nextFloat() * 100;
+		if (powerChance <= 20 || powerChance >= 80) {
+			PowerUp newPower = new PowerUp(this, MainGame.playerBulletTexture, MainGame.powers.get(r.nextInt(MainGame.powers.size())));
+			MainGame.powerUpForPickup.add(newPower);
+			System.out.println(newPower.power);
+		}
 	}
+
+
 
 	@Override
 	public void draw() {

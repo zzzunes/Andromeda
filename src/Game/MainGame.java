@@ -24,12 +24,16 @@ public class MainGame extends Game implements Scene {
 	private static final float FOLLOWER_COST = .9f;
 	private static final int PURCHASE_WAIT_TIME = 500;
 	private static final int TEXT_FLASH_RATE = 500;
-	private static final float DEATH_PENALTY_PERCENT = .5f;
-	private static final int INVINCIBILITY_TIME = 2000;
+	private static final float DEATH_PENALTY_PERCENT = .75f;
+	private static final int REVIVE_INVINCIBILITY_TIME = 2000;
 	private static final int AFTER_DEATH_HANG_TIME = 2500;
 	private static final int ENEMY_DISPATCH_TIME = 7000;
 	private static final int FINAL_BOSS_WAIT_TIME = 5000;
-	private static final int HAND_WAIT_TIME = 8000;
+	private static final int HAND_WAIT_TIME = 30000;
+	private static final int INVINCIBILITY_TIME = 5000;
+	private static final int SLOW_DOWN_TIME = 5000;
+	private static final int REGEN_AMOUNT = 75;
+	private static final int DOUBLE_BULLET_RATE = 20;
 	private Background background1;
 	private Background background2;
 	private Background pauseBackground;
@@ -64,6 +68,8 @@ public class MainGame extends Game implements Scene {
 	private int enemyDispatchTimer;
 	private int finalBossUnleashTimer;
 	private int handsDispatchTimer;
+	private int powerInvincibilityTimer;
+	private int powerSlowDownTimer;
 	private boolean timeToDie;
 	private boolean finalBossSpawned;
 	public static Texture enemyBulletTexture;
@@ -72,6 +78,8 @@ public class MainGame extends Game implements Scene {
 	private Texture fistTexture;
 	public static List<Effect> effects;
 	public static List<Bullet> enemyBullets;
+	public static List<PowerUp> powerUpForPickup;
+	public static List<POWER> powers;
 
 	public MainGame() {
 		initUI(WIDTH, HEIGHT,"アンドロメダ");
@@ -104,7 +112,9 @@ public class MainGame extends Game implements Scene {
 		effects = new ArrayList<>();
 		backgrounds = new ArrayList<>();
 		playerTeam = new ArrayList<>();
-		classNames = new ArrayList<>();//EnemyGenerator.generateEnemyList();
+		powerUpForPickup = new ArrayList<>();
+		classNames = EnemyGenerator.generateEnemyList();
+		powers = Collections.unmodifiableList(Arrays.asList(POWER.values()));
 		playerTeam.add(player);
 		playerTeam.add(leftFollower);
 		playerTeam.add(rightFollower);
@@ -116,10 +126,12 @@ public class MainGame extends Game implements Scene {
 		afterDeathTimer = 0;
 		finalBossUnleashTimer = 0;
 		handsDispatchTimer = 0;
+		powerInvincibilityTimer = INVINCIBILITY_TIME;
+		powerSlowDownTimer = SLOW_DOWN_TIME;
 		enemyDispatchTimer = ENEMY_DISPATCH_TIME;
 		timeToDie = false;
 		finalBossSpawned = false;
-		invincibilityTimer = INVINCIBILITY_TIME;
+		invincibilityTimer = REVIVE_INVINCIBILITY_TIME;
 		enemyBulletTexture = new Texture("res/Bullets/roundBullet.png");
 		playerBulletTexture = new Texture("res/Bullets/playerBullet.png");
 		handTexture = new Texture("res/hand.png");
@@ -231,7 +243,7 @@ public class MainGame extends Game implements Scene {
 			backgrounds.add(new Background(0, 0, WIDTH, HEIGHT, "Zone-202-big.png"));
 			backgrounds.add(new Background(0, -HEIGHT, WIDTH, HEIGHT, "Zone-202-big.png"));
 			music.change("kommSusserTod");
-			//music.start();
+			music.start();
 			enemies.add(EnemyGenerator.generateEyeStar(new Vector2f(HALF_WIDTH - 150, -100), new Vector2f(HALF_WIDTH + 75, 100)));
 			enemies.add(EnemyGenerator.generateEyeStar(new Vector2f(HALF_WIDTH + 75, -100), new Vector2f(HALF_WIDTH - 150, 100)));
 			finalBossSpawned = true;
@@ -261,7 +273,27 @@ public class MainGame extends Game implements Scene {
 	}
 
 	private void updateGame(int delta) {
-		invincibilityTimer += delta;
+		if (powerSlowDownTimer < SLOW_DOWN_TIME) {
+			updateLogic(delta / 4);
+			update(playerTeam, delta);
+			update(bullets, delta);
+			powerSlowDownTimer += delta;
+			// Flag to draw slow down background
+		}
+		else {
+			updateLogic(delta);
+			update(playerTeam, delta);
+			update(bullets, delta);
+		}
+	}
+
+	private void updateLogic(int delta) {
+		if (invincibilityTimer < REVIVE_INVINCIBILITY_TIME) {
+			invincibilityTimer += delta;
+		}
+		if (powerInvincibilityTimer < INVINCIBILITY_TIME) {
+			powerInvincibilityTimer += delta;
+		}
 		if (leaderIsDead()) {
 			afterDeathTimer += delta;
 			timeToDie = afterDeathTimer >= AFTER_DEATH_HANG_TIME;
@@ -274,8 +306,6 @@ public class MainGame extends Game implements Scene {
 		}
 		spawnEnemies(delta);
 		purchaseFollowers(delta);
-		update(playerTeam, delta);
-		update(bullets, delta);
 		update(enemyBullets, delta);
 		update(enemies, delta);
 		updateEffects(effects, delta);
@@ -285,13 +315,18 @@ public class MainGame extends Game implements Scene {
 
 	private void collideAndHit() {
 		detectHits(bullets, enemies);
-		if (invincibilityTimer >= INVINCIBILITY_TIME) {
+		if (invincibilityTimer >= REVIVE_INVINCIBILITY_TIME && powerInvincibilityTimer >= INVINCIBILITY_TIME) {
 			detectPlayerDamage(playerTeam);
 			detectPush(enemies, playerTeam);
 		}
+		else {
+			// Flag to draw invincibility background
+		}
+		detectPickUp(powerUpForPickup, player);
 	}
 
 	private void deactivate() {
+		deactivate(powerUpForPickup);
 		deactivate(playerTeam);
 		deactivate(bullets);
 		deactivate(enemyBullets);
@@ -301,6 +336,7 @@ public class MainGame extends Game implements Scene {
 
 	private void draw() {
 		draw(backgrounds);
+		draw(powerUpForPickup);
 		draw(playerTeam);
 		draw(enemies);
 		draw(bullets);
@@ -393,6 +429,29 @@ public class MainGame extends Game implements Scene {
 				else {
 					effects.add(EffectGenerator.generateRedFlashFollower(player));
 				}
+			}
+		}
+	}
+
+	private void detectPickUp(List<PowerUp> powers, Player player) {
+		for (PowerUp power : powers) {
+			if (power.getHitbox().intersects(player.getHitbox())) {
+				System.out.println("Power picked up: " + power.power);
+				switch(power.power) {
+					case SLOW_TIME:
+						powerSlowDownTimer = 0;
+						break;
+					case DOUBLE_SHOT:
+						player.speedShot(DOUBLE_BULLET_RATE);
+						break;
+					case HEALTH_REGEN:
+						player.health = Math.min(player.health + REGEN_AMOUNT, player.maxHealth);
+						break;
+					case INVINCIBILITY:
+						powerInvincibilityTimer = 0;
+						break;
+				}
+				power.deactivate();
 			}
 		}
 	}

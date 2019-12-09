@@ -40,7 +40,7 @@ public class Hand extends Enemy {
 		positioning = (positionTimer < 6000);
 		if (positioning) {
 			dir.y = target.pos.y - pos.y - 25;
-			dir.x = 20 - pos.x;
+			dir.x = 0 - pos.x;
 		}
 		if (!positioning) {
 			windupTimer += delta;
@@ -52,7 +52,7 @@ public class Hand extends Enemy {
 			pos.x += dir.x * speed * delta * 2;
 			texture = open;
 		}
-		else if (Math.abs(dir.y) > 1 || Math.abs(dir.x) > 1) {
+		else if (Math.abs(dir.y) > 3 || Math.abs(dir.x) > 3) {
 			dir.normalize();
 			pos.x += dir.x * speed * delta;
 			pos.y += dir.y * speed * delta;

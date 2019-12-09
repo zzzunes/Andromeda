@@ -9,6 +9,7 @@ import edu.utc.game.Game;
 import edu.utc.game.GameObject;
 import edu.utc.game.Texture;
 import org.lwjgl.glfw.GLFW;
+import sun.awt.X11.XDestroyWindowEvent;
 
 public class Player extends GameObject {
 	protected Vector2f pos;
@@ -19,12 +20,16 @@ public class Player extends GameObject {
 	public float health;
 	public float maxHealth;
 	public int bulletTimer;
+	public int permanentBulletRate;
 	public int bulletRate;
 	public float bulletSpeed;
 	public boolean isLeader;
 	public boolean hit;
 	public int hitTimer;
 	public int hitTimePeriod;
+	private int speedBulletTimer;
+	private boolean speedBulletsActive;
+	private int maxSpeedBulletTime;
 
 	public Player(Vector2f position) {
 		this.pos = position;
@@ -33,15 +38,24 @@ public class Player extends GameObject {
 		this.direction = new Vector2f(0, 0);
 		this.texture = new Texture("res/spaceship.png");
 		this.healthBar = new HealthBar(100, this);
-		this.health = 125;
-		this.maxHealth = 125;
+		this.health = 150;
+		this.maxHealth = 150;
 		this.bulletTimer = 0;
 		this.bulletRate = 35;
+		this.permanentBulletRate = this.bulletRate;
 		this.bulletSpeed = 1.75f;
 		this.isLeader = true;
 		this.hit = false;
 		this.hitTimer = 0;
 		this.hitTimePeriod = 500;
+		this.speedBulletTimer = 0;
+		this.speedBulletsActive = false;
+		this.maxSpeedBulletTime = 10000;
+	}
+
+	public void speedShot(int newRate) {
+		this.bulletRate = newRate;
+		speedBulletsActive = true;
 	}
 
 	public Vector2f getLocation() {
@@ -54,6 +68,13 @@ public class Player extends GameObject {
 
 	@Override
 	public void update(int delta) {
+		if (speedBulletsActive) {
+			speedBulletTimer += delta;
+			if (speedBulletTimer > maxSpeedBulletTime) {
+				speedBulletsActive = false;
+				bulletRate = permanentBulletRate;
+			}
+		}
 		bulletTimer += delta;
 		if (hit) {
 			hitTimer += delta;
