@@ -216,7 +216,7 @@ public class TextEnemy extends Enemy {
 		Effect explode = EffectGenerator.generateDeathExplosion(this);
 		MainGame.effects.add(explode);
 		float powerChance = r.nextFloat() * 100;
-		if (powerChance <= 20 || powerChance >= 85) {
+		if (powerChance <= 20 || powerChance >= 70) {
 			POWER power = MainGame.powers.get(r.nextInt(MainGame.powers.size()));
 			Texture powerTexture = EffectGenerator.getPowerMap().get(power);
 			PowerUp newPower = new PowerUp(this, powerTexture, power);

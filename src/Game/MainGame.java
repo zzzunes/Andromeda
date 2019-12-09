@@ -30,6 +30,7 @@ public class MainGame extends Game implements Scene {
 	private static final int ENEMY_DISPATCH_TIME = 7000;
 	private static final int FINAL_BOSS_WAIT_TIME = 5000;
 	private static final int HAND_WAIT_TIME = 30000;
+	private static final int POWER_SPAWN_TIME = 12000;
 	private static final int INVINCIBILITY_TIME = 7500;
 	private static final int SLOW_DOWN_TIME = 7500;
 	private static final int REGEN_AMOUNT = 50;
@@ -57,6 +58,7 @@ public class MainGame extends Game implements Scene {
 	private List<Player> playerTeam;
 	private List<Background> backgrounds;
 	private List<String> classNames;
+	private List<Vector2f> powerSpawnPositions;
 	private BackgroundMusic music;
 	private boolean paused;
 	private boolean gameOver;
@@ -73,6 +75,7 @@ public class MainGame extends Game implements Scene {
 	private int handsDispatchTimer;
 	private int powerInvincibilityTimer;
 	private int powerSlowDownTimer;
+	private int powerSpawnTimer;
 	private boolean timeToDie;
 	private boolean finalBossSpawned;
 	private boolean isInvincible;
@@ -84,6 +87,7 @@ public class MainGame extends Game implements Scene {
 	private Texture blackSlot;
 	private SpellSlot spellSlotOne;
 	private SpellSlot spellSlotTwo;
+	private Random r;
 	public static List<Effect> effects;
 	public static List<Bullet> enemyBullets;
 	public static List<PowerUp> availablePowerUps;
@@ -112,6 +116,13 @@ public class MainGame extends Game implements Scene {
 		player = new Player(new Vector2f(WIDTH / 2f, HEIGHT / 2f));
 		leftFollower = new Follower(player, true, "res/teamShip.png");
 		rightFollower = new Follower(player, false, "res/teamShip.png");
+		powerSpawnPositions = new ArrayList<>();
+		powerSpawnPositions.add(new Vector2f(25, HALF_HEIGHT + 150));
+		powerSpawnPositions.add(new Vector2f(HALF_WIDTH-25, HALF_HEIGHT + 150));
+		powerSpawnPositions.add(new Vector2f(HALF_WIDTH+175, HALF_HEIGHT + 150));
+		powerSpawnPositions.add(new Vector2f(25, HALF_HEIGHT + 300));
+		powerSpawnPositions.add(new Vector2f(HALF_WIDTH-25, HALF_HEIGHT + 300));
+		powerSpawnPositions.add(new Vector2f(HALF_WIDTH+175, HALF_HEIGHT + 300));
 		bullets = new ArrayList<>();
 		enemyBullets = new ArrayList<>();
 		enemies = new ArrayList<>();
@@ -125,6 +136,7 @@ public class MainGame extends Game implements Scene {
 		handTexture = new Texture("res/hand.png");
 		fistTexture = new Texture("res/hand2.png");
 		blackSlot = new Texture("res/Backgrounds/blackSlot.png");
+		r = new Random();
 		spellSlotOne = new SpellSlot(blackSlot, new Vector2f(WIDTH - 175,HEIGHT - 75));
 		spellSlotTwo = new SpellSlot(blackSlot, new Vector2f(WIDTH - 100,HEIGHT - 75));
 		GLFW.glfwSetKeyCallback(Game.ui.getWindow(), keys);
@@ -238,6 +250,7 @@ public class MainGame extends Game implements Scene {
 		afterDeathTimer = 0;
 		finalBossUnleashTimer = 0;
 		handsDispatchTimer = 0;
+		powerSpawnTimer = 0;
 		powerInvincibilityTimer = INVINCIBILITY_TIME;
 		powerSlowDownTimer = SLOW_DOWN_TIME;
 		enemyDispatchTimer = ENEMY_DISPATCH_TIME;
@@ -264,7 +277,7 @@ public class MainGame extends Game implements Scene {
 		playerTeam.add(player);
 		playerTeam.add(leftFollower);
 		playerTeam.add(rightFollower);
-		classNames = EnemyGenerator.generateEnemyList();
+		classNames = new ArrayList<>();//EnemyGenerator.generateEnemyList();
 		backgrounds.clear();
 		backgrounds.add(background1);
 		backgrounds.add(background2);
@@ -291,9 +304,20 @@ public class MainGame extends Game implements Scene {
 
 	private void spawnHands(int delta) {
 		handsDispatchTimer += delta;
-		if (handsDispatchTimer > HAND_WAIT_TIME) {
+		if (handsDispatchTimer >= HAND_WAIT_TIME) {
 			enemies.add(new Hand(handTexture, fistTexture, player));
 			handsDispatchTimer = 0;
+		}
+	}
+
+	private void spawnPowers(int delta) {
+		powerSpawnTimer += delta;
+		if (powerSpawnTimer >= POWER_SPAWN_TIME) {
+			Vector2f spawnPosition = powerSpawnPositions.get(r.nextInt(powerSpawnPositions.size()));
+			POWER power = MainGame.powers.get(r.nextInt(MainGame.powers.size()));
+			Texture powerTexture = EffectGenerator.getPowerMap().get(power);
+			availablePowerUps.add(new PowerUp(spawnPosition, powerTexture, power));
+			powerSpawnTimer = 0;
 		}
 	}
 
@@ -342,8 +366,9 @@ public class MainGame extends Game implements Scene {
 		if (classNames.isEmpty() && enemies.isEmpty() && !finalBossSpawned) {
 			spawnFinalBoss(delta);
 		}
-		if (finalBossSpawned) {
+		if (finalBossSpawned && !enemies.isEmpty()) {
 			spawnHands(delta);
+			spawnPowers(delta);
 		}
 		spawnEnemies(delta);
 		purchaseFollowers(delta);
@@ -479,7 +504,6 @@ public class MainGame extends Game implements Scene {
 	private void detectPickUp(List<PowerUp> powers, Player player) {
 		for (PowerUp power : powers) {
 			if (power.getHitbox().intersects(player.getHitbox())) {
-				System.out.println("Power picked up: " + power.power);
 				if (spellSlotOne.power == null) {
 					spellSlotOne.setPower(new PowerUp(power));
 				}

@@ -1,5 +1,6 @@
 package Entities;
 
+import Tools.Vector2f;
 import edu.utc.game.GameObject;
 import edu.utc.game.Texture;
 
@@ -14,6 +15,14 @@ public class PowerUp extends GameObject {
 	public PowerUp(Enemy enemy, Texture texture, POWER power) {
 		Rectangle r = enemy.getHitbox();
 		this.hitbox.setBounds(r.x + r.width / 2 - 25, r.y + r.height / 2 - 25, 50, 50);
+		this.texture = texture;
+		this.power = power;
+		this.lifeTimer = 0;
+		this.lifeTime = 15000;
+	}
+
+	public PowerUp(Vector2f pos, Texture texture, POWER power) {
+		this.hitbox.setBounds((int) pos.x, (int) pos.y, 50, 50);
 		this.texture = texture;
 		this.power = power;
 		this.lifeTimer = 0;

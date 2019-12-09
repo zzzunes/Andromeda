@@ -28,7 +28,6 @@ public class SpellSlot extends GameObject {
 	public void draw() {
 		backgroundTexture.draw(this);
 		if (power != null) {
-			System.out.println(power.power);
 			power.draw();
 		}
 	}
