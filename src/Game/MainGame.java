@@ -36,7 +36,7 @@ public class MainGame extends Game implements Scene {
 	private static final int POWER_SPAWN_TIME = 12000;
 	private static final int INVINCIBILITY_TIME = 7500;
 	private static final int SLOW_DOWN_TIME = 7500;
-	private static final int REGEN_AMOUNT = 50;
+	private static final int REGEN_AMOUNT = 100;
 	private static final int DOUBLE_BULLET_RATE = 15;
 	private static final int POST_GAME_DELAY = 1500;
 	private Background background1;
@@ -45,7 +45,6 @@ public class MainGame extends Game implements Scene {
 	private Background blue;
 	private Background yellow;
 	private Text pauseText;
-	private Text scoreText;
 	private Text pauseScoreText;
 	private Text deathText;
 	private Text continueYes;
@@ -135,7 +134,6 @@ public class MainGame extends Game implements Scene {
 		blue = new Background(0, 0, WIDTH, HEIGHT, "blue.png");
 		yellow = new Background(0, 0, WIDTH, HEIGHT, "yellow.png");
 		pauseText = new Text(HALF_WIDTH - 70, HALF_HEIGHT - 140, 40, 30, "PAUSED");
-		scoreText = new Text(0, HEIGHT - 50, 15, 10, "SCORE:" + score);
 		pauseScoreText = new Text(HALF_WIDTH - 60, HALF_HEIGHT - 80, 40, 30, "SCORE:" + score);
 		deathText = new Text(HALF_WIDTH-90, HALF_HEIGHT - 200, 40, 30, "CONTINUE?");
 		continueYes = new Text(HALF_WIDTH-170, HALF_HEIGHT - 150, 40, 30, "YES (Z)");
@@ -522,7 +520,6 @@ public class MainGame extends Game implements Scene {
 		update(enemies, delta);
 		updateEffects(effects, delta);
 		update(backgrounds, delta);
-		updateScore();
 	}
 
 	private void collideAndHit() {
@@ -555,7 +552,6 @@ public class MainGame extends Game implements Scene {
 		drawEffects(effects);
 		spellSlotOne.draw();
 		spellSlotTwo.draw();
-		scoreText.draw();
 	}
 
 	private <T extends GameObject> void update(List<T> gameObjects, int delta) {
@@ -739,15 +735,14 @@ public class MainGame extends Game implements Scene {
 		}
 	}
 
-	private void updateScore() {
+	private int getLeftShift() {
 		int leftShift = 0;
 		int scoreCopy = score;
 		while (scoreCopy > 0) {
 			scoreCopy /= 10;
 			leftShift += 10;
 		}
-		scoreText = new Text(0, HEIGHT - 50, 30, 25, "SCORE: " + score);
-		pauseScoreText = new Text(HALF_WIDTH - 80  - leftShift, HALF_HEIGHT - 80, 40, 30, "SCORE: " + score);
+		return leftShift;
 	}
 
 	/* ******************************************************************** */
@@ -760,6 +755,7 @@ public class MainGame extends Game implements Scene {
 			if (!paused && action == GLFW.GLFW_PRESS && key == GLFW.GLFW_KEY_BACKSPACE) {
 				paused = true;
 				music.pause();
+				pauseScoreText = new Text(HALF_WIDTH - 80  - getLeftShift(), HALF_HEIGHT - 80, 40, 30, "SCORE: " + score);
 			}
 			else if (paused && action == GLFW.GLFW_PRESS && key == GLFW.GLFW_KEY_BACKSPACE) {
 				paused = false;

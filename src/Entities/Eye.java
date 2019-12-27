@@ -26,8 +26,8 @@ public class Eye extends Enemy {
 		super(destination, texture);
 		this.pos = position;
 		this.hitbox.setBounds((int) pos.x, (int) pos.y, 70, 70);
-		this.health = 1600;
-		this.maxHealth = 1600;
+		this.health = 1000;
+		this.maxHealth = 1000;
 		this.healthBar = new EnemyHealthBar(100, this);
 		this.speed = .075f;
 		this.destinationReached = false;
@@ -35,7 +35,7 @@ public class Eye extends Enemy {
 		this.bulletDelay = delay;
 		this.bulletSpeed = .25f;
 		this.pattern = pattern;
-		this.bulletsPerFrame = 100;
+		this.bulletsPerFrame = 60;
 		this.goingRight = true;
 		this.delayed = false;
 		this.patternTimer = 0;

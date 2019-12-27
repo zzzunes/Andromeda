@@ -33,3 +33,5 @@ The <b> blue shield </b> will grant invincibility
 
 Abilities are stored in <b> spell slots </b> on the bottom right corner of your screen. You may hold two at a time. 
 If spells are left in space, they will disappear after a period of time.
+
+When asked for your name, type your name and then press enter. The text will then reveal itself.

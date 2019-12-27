@@ -38,8 +38,8 @@ public class Player extends GameObject {
 		this.direction = new Vector2f(0, 0);
 		this.texture = new Texture("res/spaceship.png");
 		this.healthBar = new HealthBar(100, this);
-		this.health = 150;
-		this.maxHealth = 150;
+		this.health = 500;
+		this.maxHealth = 500;
 		this.bulletTimer = 0;
 		this.bulletRate = 35;
 		this.permanentBulletRate = this.bulletRate;
