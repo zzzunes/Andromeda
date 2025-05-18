@@ -1,5 +1,7 @@
 # アンドロメダ (ANDROMEDA)
 
+<i> This game requires a resource folder for assets, please email me. :) </i>
+
 # Core Controls
 <b> WASD || Arrow Keys </b> - Move
 
